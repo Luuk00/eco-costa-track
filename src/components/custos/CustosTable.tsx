@@ -38,8 +38,10 @@ export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTable
           <TableRow>
             <TableHead>Data</TableHead>
             <TableHead>Obra</TableHead>
+            <TableHead>Receptor/Destinatário</TableHead>
             <TableHead>Descrição</TableHead>
             <TableHead>Tipo</TableHead>
+            <TableHead>Observação</TableHead>
             <TableHead className="text-right">Valor</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -48,13 +50,15 @@ export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTable
           {custos.map((custo) => (
             <TableRow key={custo.id}>
               <TableCell>
-                {format(new Date(custo.data), "dd/MM/yyyy", { locale: ptBR })}
+                {format(new Date(custo.data + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR })}
               </TableCell>
               <TableCell className="font-medium">
                 {custo.obras?.nome || "-"}
               </TableCell>
+              <TableCell>{custo.receptor_destinatario || "-"}</TableCell>
               <TableCell>{custo.descricao || "-"}</TableCell>
               <TableCell>{custo.tipo_operacao || "-"}</TableCell>
+              <TableCell className="max-w-xs truncate">{custo.observacao || "-"}</TableCell>
               <TableCell className="text-right font-semibold text-secondary">
                 {new Intl.NumberFormat("pt-BR", {
                   style: "currency",

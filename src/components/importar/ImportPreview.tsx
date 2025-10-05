@@ -60,7 +60,7 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
           documento: l.documento,
           codigo_operacao: l.codigo_operacao,
           tipo_operacao: l.tipo_operacao,
-          nome: l.nome,
+          receptor_destinatario: l.nome,
           descricao: `Importado de CSV - ${l.tipo_operacao}`,
         }));
 

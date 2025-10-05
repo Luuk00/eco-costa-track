@@ -5,11 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CustoDialog } from "@/components/custos/CustoDialog";
 import { CustosTable } from "@/components/custos/CustosTable";
+import { CustosFilters } from "@/components/custos/CustosFilters";
+import { exportToCSV, exportToPDF } from "@/lib/exportUtils";
 import { toast } from "sonner";
 
 export default function Custos() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCusto, setEditingCusto] = useState<any>(null);
+  const [selectedObra, setSelectedObra] = useState("all");
+  const [selectedTipo, setSelectedTipo] = useState("all");
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
   const queryClient = useQueryClient();
 
   const { data: custos, isLoading } = useQuery({
@@ -28,6 +34,27 @@ export default function Custos() {
       return data;
     },
   });
+
+  const { data: obras } = useQuery({
+    queryKey: ["obras"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("obras")
+        .select("*")
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Filtrar custos
+  const custosFiltrados = custos?.filter((custo) => {
+    if (selectedObra !== "all" && custo.obra_id !== selectedObra) return false;
+    if (selectedTipo !== "all" && custo.tipo_operacao !== selectedTipo) return false;
+    if (dataInicio && custo.data < dataInicio) return false;
+    if (dataFim && custo.data > dataFim) return false;
+    return true;
+  }) || [];
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -59,6 +86,15 @@ export default function Custos() {
     setEditingCusto(null);
   };
 
+  const handleExportCSV = () => {
+    exportToCSV(custosFiltrados, "custos");
+    toast.success("CSV exportado com sucesso!");
+  };
+
+  const handleExportPDF = () => {
+    exportToPDF(custosFiltrados, "custos");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -72,8 +108,22 @@ export default function Custos() {
         </Button>
       </div>
 
+      <CustosFilters
+        obras={obras || []}
+        selectedObra={selectedObra}
+        setSelectedObra={setSelectedObra}
+        selectedTipo={selectedTipo}
+        setSelectedTipo={setSelectedTipo}
+        dataInicio={dataInicio}
+        setDataInicio={setDataInicio}
+        dataFim={dataFim}
+        setDataFim={setDataFim}
+        onExportCSV={handleExportCSV}
+        onExportPDF={handleExportPDF}
+      />
+
       <CustosTable
-        custos={custos || []}
+        custos={custosFiltrados}
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}

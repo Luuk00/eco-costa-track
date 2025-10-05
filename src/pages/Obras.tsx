@@ -6,11 +6,13 @@ import { Plus } from "lucide-react";
 import { ObraDialog } from "@/components/obras/ObraDialog";
 import { ObrasTable } from "@/components/obras/ObrasTable";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export default function Obras() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingObra, setEditingObra] = useState<any>(null);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: obras, isLoading } = useQuery({
     queryKey: ["obras"],
@@ -54,6 +56,10 @@ export default function Obras() {
     setEditingObra(null);
   };
 
+  const handleViewDetails = (id: string) => {
+    navigate(`/obras/${id}`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -72,6 +78,7 @@ export default function Obras() {
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onViewDetails={handleViewDetails}
       />
 
       <ObraDialog

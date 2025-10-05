@@ -1,0 +1,115 @@
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+export const exportToCSV = (custos: any[], filename: string = "custos") => {
+  const headers = [
+    "Data",
+    "Obra",
+    "Receptor/Destinatário",
+    "Descrição",
+    "Tipo",
+    "Observação",
+    "Valor",
+  ];
+
+  const rows = custos.map((custo) => [
+    format(new Date(custo.data + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR }),
+    custo.obras?.nome || "-",
+    custo.receptor_destinatario || "-",
+    custo.descricao || "-",
+    custo.tipo_operacao || "-",
+    custo.observacao || "-",
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(custo.valor),
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
+
+  const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", `${filename}_${format(new Date(), "yyyy-MM-dd")}.csv`);
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+export const exportToPDF = (custos: any[], filename: string = "custos") => {
+  const headers = [
+    "Data",
+    "Obra",
+    "Receptor/Destinatário",
+    "Descrição",
+    "Tipo",
+    "Observação",
+    "Valor",
+  ];
+
+  const rows = custos.map((custo) => [
+    format(new Date(custo.data + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR }),
+    custo.obras?.nome || "-",
+    custo.receptor_destinatario || "-",
+    custo.descricao || "-",
+    custo.tipo_operacao || "-",
+    custo.observacao || "-",
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(custo.valor),
+  ]);
+
+  let htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #047857; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+        th { background-color: #047857; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .total { font-weight: bold; background-color: #e0f2f1; }
+      </style>
+    </head>
+    <body>
+      <h1>Relatório de Custos - EcoCosta Track</h1>
+      <p>Data de geração: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
+      <table>
+        <thead>
+          <tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr>
+        </thead>
+        <tbody>
+          ${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}
+          <tr class="total">
+            <td colspan="6">Total:</td>
+            <td>${new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(custos.reduce((sum, c) => sum + c.valor, 0))}</td>
+          </tr>
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const printWindow = window.open("", "_blank");
+  if (printWindow) {
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 250);
+  }
+};

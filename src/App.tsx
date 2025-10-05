@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Obras from "./pages/Obras";
+import ObraDetalhes from "./pages/ObraDetalhes";
 import Custos from "./pages/Custos";
 import ImportarCSV from "./pages/ImportarCSV";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/obras" element={<Obras />} />
+            <Route path="/obras/:id" element={<ObraDetalhes />} />
             <Route path="/custos" element={<Custos />} />
             <Route path="/importar" element={<ImportarCSV />} />
             <Route path="*" element={<NotFound />} />

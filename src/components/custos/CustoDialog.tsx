@@ -38,7 +38,8 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
       tipo_operacao: "",
       documento: "",
       codigo_operacao: "",
-      nome: "",
+      receptor_destinatario: "",
+      observacao: "",
     },
   });
 
@@ -58,15 +59,20 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
 
   useEffect(() => {
     if (custo) {
+      // Corrigir problema de data - usar formato local sem conversão de timezone
+      const dataLocal = custo.data ? new Date(custo.data + 'T00:00:00') : null;
+      const dataFormatada = dataLocal ? dataLocal.toISOString().split('T')[0] : '';
+      
       reset({
         obra_id: custo.obra_id,
-        data: custo.data,
+        data: dataFormatada,
         valor: custo.valor,
         descricao: custo.descricao || "",
         tipo_operacao: custo.tipo_operacao || "",
         documento: custo.documento || "",
         codigo_operacao: custo.codigo_operacao || "",
-        nome: custo.nome || "",
+        receptor_destinatario: custo.receptor_destinatario || "",
+        observacao: custo.observacao || "",
       });
     } else {
       reset({
@@ -77,7 +83,8 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
         tipo_operacao: "",
         documento: "",
         codigo_operacao: "",
-        nome: "",
+        receptor_destinatario: "",
+        observacao: "",
       });
     }
   }, [custo, reset]);
@@ -179,9 +186,14 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
             </div>
 
             <div>
-              <Label htmlFor="nome">Nome</Label>
-              <Input id="nome" {...register("nome")} />
+              <Label htmlFor="receptor_destinatario">Receptor/Destinatário</Label>
+              <Input id="receptor_destinatario" {...register("receptor_destinatario")} />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="observacao">Observação</Label>
+            <Textarea id="observacao" {...register("observacao")} placeholder="Adicione observações sobre este custo..." />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

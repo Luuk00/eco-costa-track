@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -16,9 +16,10 @@ interface ObrasTableProps {
   isLoading: boolean;
   onEdit: (obra: any) => void;
   onDelete: (id: string) => void;
+  onViewDetails?: (id: string) => void;
 }
 
-export function ObrasTable({ obras, isLoading, onEdit, onDelete }: ObrasTableProps) {
+export function ObrasTable({ obras, isLoading, onEdit, onDelete, onViewDetails }: ObrasTableProps) {
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">Carregando...</div>;
   }
@@ -50,11 +51,11 @@ export function ObrasTable({ obras, isLoading, onEdit, onDelete }: ObrasTablePro
               <TableCell className="font-medium">{obra.nome}</TableCell>
               <TableCell>{obra.cliente}</TableCell>
               <TableCell>
-                {format(new Date(obra.data_inicio), "dd/MM/yyyy", { locale: ptBR })}
+                {format(new Date(obra.data_inicio + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR })}
               </TableCell>
               <TableCell>
                 {obra.data_fim
-                  ? format(new Date(obra.data_fim), "dd/MM/yyyy", { locale: ptBR })
+                  ? format(new Date(obra.data_fim + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR })
                   : "-"}
               </TableCell>
               <TableCell>
@@ -71,6 +72,16 @@ export function ObrasTable({ obras, isLoading, onEdit, onDelete }: ObrasTablePro
                 </span>
               </TableCell>
               <TableCell className="text-right">
+                {onViewDetails && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onViewDetails(obra.id)}
+                    className="mr-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"

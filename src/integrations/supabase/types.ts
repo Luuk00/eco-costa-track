@@ -22,8 +22,9 @@ export type Database = {
           descricao: string | null
           documento: string | null
           id: string
-          nome: string | null
           obra_id: string
+          observacao: string | null
+          receptor_destinatario: string | null
           tipo_operacao: string | null
           updated_at: string
           valor: number
@@ -35,8 +36,9 @@ export type Database = {
           descricao?: string | null
           documento?: string | null
           id?: string
-          nome?: string | null
           obra_id: string
+          observacao?: string | null
+          receptor_destinatario?: string | null
           tipo_operacao?: string | null
           updated_at?: string
           valor: number
@@ -48,8 +50,9 @@ export type Database = {
           descricao?: string | null
           documento?: string | null
           id?: string
-          nome?: string | null
           obra_id?: string
+          observacao?: string | null
+          receptor_destinatario?: string | null
           tipo_operacao?: string | null
           updated_at?: string
           valor?: number

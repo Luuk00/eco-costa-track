@@ -14,6 +14,7 @@ export default function Custos() {
   const [editingCusto, setEditingCusto] = useState<any>(null);
   const [selectedObra, setSelectedObra] = useState("all");
   const [selectedTipo, setSelectedTipo] = useState("all");
+  const [selectedObservacao, setSelectedObservacao] = useState("all");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const queryClient = useQueryClient();
@@ -47,10 +48,16 @@ export default function Custos() {
     },
   });
 
+  // Obter observações únicas para o filtro
+  const observacoesUnicas = Array.from(
+    new Set(custos?.map((c) => c.observacao).filter((obs) => obs && obs.trim() !== ""))
+  ).sort();
+
   // Filtrar custos
   const custosFiltrados = custos?.filter((custo) => {
     if (selectedObra !== "all" && custo.obra_id !== selectedObra) return false;
     if (selectedTipo !== "all" && custo.tipo_operacao !== selectedTipo) return false;
+    if (selectedObservacao !== "all" && custo.observacao !== selectedObservacao) return false;
     if (dataInicio && custo.data < dataInicio) return false;
     if (dataFim && custo.data > dataFim) return false;
     return true;
@@ -110,10 +117,13 @@ export default function Custos() {
 
       <CustosFilters
         obras={obras || []}
+        observacoes={observacoesUnicas}
         selectedObra={selectedObra}
         setSelectedObra={setSelectedObra}
         selectedTipo={selectedTipo}
         setSelectedTipo={setSelectedTipo}
+        selectedObservacao={selectedObservacao}
+        setSelectedObservacao={setSelectedObservacao}
         dataInicio={dataInicio}
         setDataInicio={setDataInicio}
         dataFim={dataFim}

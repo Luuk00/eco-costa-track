@@ -4,7 +4,7 @@ import { ptBR } from "date-fns/locale";
 export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const headers = [
     "Data",
-    "Obra",
+    "Central de Custos",
     "Receptor/Destinatário",
     "Descrição",
     "Tipo",
@@ -44,7 +44,7 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
 export const exportToPDF = (custos: any[], filename: string = "custos") => {
   const headers = [
     "Data",
-    "Obra",
+    "Central de Custos",
     "Receptor/Destinatário",
     "Descrição",
     "Tipo",

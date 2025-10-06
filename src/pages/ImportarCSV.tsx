@@ -28,8 +28,21 @@ export default function ImportarCSV() {
       // Remover números iniciais se começar com dígitos
       nome = nome.replace(/^\d+[\s\/\-:]*/g, "").trim();
       
+      // Converter data de DD/MM/AAAA para AAAA-MM-DD
+      const dataOriginal = columns[3] || "";
+      let dataFormatada = dataOriginal;
+      if (dataOriginal && dataOriginal.includes("/")) {
+        const partes = dataOriginal.split("/");
+        if (partes.length === 3) {
+          const dia = partes[0].padStart(2, "0");
+          const mes = partes[1].padStart(2, "0");
+          const ano = partes[2];
+          dataFormatada = `${ano}-${mes}-${dia}`;
+        }
+      }
+      
       return {
-        data: columns[3] || "", // Coluna D
+        data: dataFormatada,
         documento: columns[7] || "", // Coluna H
         codigo_operacao: columns[8] || "", // Coluna I
         tipo_operacao: columns[9] || "", // Coluna J

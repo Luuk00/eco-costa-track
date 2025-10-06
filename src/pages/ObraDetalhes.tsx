@@ -50,7 +50,7 @@ export default function ObraDetalhes() {
   }
 
   if (!obra) {
-    return <div className="text-center py-8">Obra não encontrada</div>;
+    return <div className="text-center py-8">Central de Custos não encontrada</div>;
   }
 
   const totalCustos = custos?.reduce((sum, c) => sum + c.valor, 0) || 0;
@@ -119,7 +119,7 @@ export default function ObraDetalhes() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Informações da Obra</CardTitle>
+          <CardTitle>Informações da Central de Custos</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
@@ -187,7 +187,7 @@ export default function ObraDetalhes() {
               </Table>
             </div>
           ) : (
-            <p className="text-center py-8 text-muted-foreground">Nenhum custo registrado para esta obra</p>
+            <p className="text-center py-8 text-muted-foreground">Nenhum custo registrado para esta central de custos</p>
           )}
         </CardContent>
       </Card>

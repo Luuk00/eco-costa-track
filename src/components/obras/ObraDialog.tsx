@@ -75,12 +75,12 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["obras"] });
-      toast.success(obra ? "Obra atualizada!" : "Obra criada com sucesso!");
+      toast.success(obra ? "Central de Custos atualizada!" : "Central de Custos criada com sucesso!");
       onOpenChange(false);
       reset();
     },
     onError: () => {
-      toast.error("Erro ao salvar obra");
+      toast.error("Erro ao salvar central de custos");
     },
   });
 
@@ -96,11 +96,11 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{obra ? "Editar Obra" : "Nova Obra"}</DialogTitle>
+          <DialogTitle>{obra ? "Editar Central de Custos" : "Nova Central de Custos"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="nome">Nome da Obra</Label>
+            <Label htmlFor="nome">Nome da Central de Custos</Label>
             <Input id="nome" {...register("nome", { required: true })} />
           </div>
 

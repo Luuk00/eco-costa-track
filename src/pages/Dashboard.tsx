@@ -36,18 +36,18 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Visão geral do sistema de gestão de obras</p>
+        <p className="text-muted-foreground">Visão geral do sistema de gestão de centrais de custos</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Obras</CardTitle>
+            <CardTitle className="text-sm font-medium">Total de Centrais</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">{totalObras}</div>
-            <p className="text-xs text-muted-foreground mt-1">Obras cadastradas</p>
+            <p className="text-xs text-muted-foreground mt-1">Centrais cadastradas</p>
           </CardContent>
         </Card>
 
@@ -58,7 +58,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-warning">{obrasEmAndamento}</div>
-            <p className="text-xs text-muted-foreground mt-1">Obras ativas</p>
+            <p className="text-xs text-muted-foreground mt-1">Centrais ativas</p>
           </CardContent>
         </Card>
 
@@ -69,7 +69,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">{obrasConcluidas}</div>
-            <p className="text-xs text-muted-foreground mt-1">Obras finalizadas</p>
+            <p className="text-xs text-muted-foreground mt-1">Centrais finalizadas</p>
           </CardContent>
         </Card>
 
@@ -93,7 +93,7 @@ export default function Dashboard() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Obras Recentes</CardTitle>
+            <CardTitle>Centrais Recentes</CardTitle>
           </CardHeader>
           <CardContent>
             {obras && obras.length > 0 ? (
@@ -117,7 +117,7 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">Nenhuma obra cadastrada</p>
+              <p className="text-muted-foreground text-sm">Nenhuma central cadastrada</p>
             )}
           </CardContent>
         </Card>

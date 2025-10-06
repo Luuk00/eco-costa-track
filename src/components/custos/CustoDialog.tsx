@@ -130,10 +130,10 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <Label htmlFor="obra_id">Obra</Label>
+            <Label htmlFor="obra_id">Central de Custos</Label>
             <Select value={obraId} onValueChange={(value) => setValue("obra_id", value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione uma obra" />
+                <SelectValue placeholder="Selecione uma central de custos" />
               </SelectTrigger>
               <SelectContent>
                 {obras?.map((obra) => (

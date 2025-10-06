@@ -33,10 +33,10 @@ export default function Obras() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["obras"] });
-      toast.success("Obra excluída com sucesso!");
+      toast.success("Central de Custos excluída com sucesso!");
     },
     onError: () => {
-      toast.error("Erro ao excluir obra");
+      toast.error("Erro ao excluir central de custos");
     },
   });
 
@@ -46,7 +46,7 @@ export default function Obras() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir esta obra?")) {
+    if (confirm("Tem certeza que deseja excluir esta central de custos?")) {
       deleteMutation.mutate(id);
     }
   };
@@ -64,12 +64,12 @@ export default function Obras() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Obras</h1>
-          <p className="text-muted-foreground">Gerencie todas as obras da empresa</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Central de Custos</h1>
+          <p className="text-muted-foreground">Gerencie as centrais de custos cadastradas</p>
         </div>
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Nova Obra
+          Nova Central de Custos
         </Button>
       </div>
 

@@ -47,10 +47,15 @@ export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTable
           </TableRow>
         </TableHeader>
         <TableBody>
-          {custos.map((custo) => (
+          {custos.map((custo) => {
+            // Parsear data corretamente do formato YYYY-MM-DD
+            const [ano, mes, dia] = custo.data.split('-');
+            const dataFormatada = `${dia}/${mes}/${ano}`;
+            
+            return (
             <TableRow key={custo.id}>
               <TableCell>
-                {format(new Date(custo.data + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR })}
+                {dataFormatada}
               </TableCell>
               <TableCell className="font-medium">
                 {custo.obras?.nome || "-"}
@@ -83,7 +88,8 @@ export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTable
                 </Button>
               </TableCell>
             </TableRow>
-          ))}
+            );
+          })}
         </TableBody>
       </Table>
     </div>

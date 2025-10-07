@@ -1,4 +1,4 @@
-import { Building2, DollarSign, Upload, LayoutDashboard } from "lucide-react";
+import { Building2, DollarSign, Upload, LayoutDashboard, Wallet } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -15,6 +15,7 @@ import {
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Central de Custos", url: "/obras", icon: Building2 },
+  { title: "Central de Gastos", url: "/gastos", icon: Wallet },
   { title: "Custos", url: "/custos", icon: DollarSign },
   { title: "Importar CSV", url: "/importar", icon: Upload },
 ];
@@ -25,7 +26,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-2">
           <Building2 className="h-6 w-6 text-sidebar-foreground" />
-          <span className="font-bold text-lg text-sidebar-foreground">EcoCosta Track</span>
+          <span className="font-bold text-lg text-sidebar-foreground">MAP AMBIENTAL</span>
         </div>
       </SidebarHeader>
       

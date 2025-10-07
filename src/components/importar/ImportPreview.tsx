@@ -43,18 +43,44 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
     },
   });
 
+  const { data: gastos } = useQuery({
+    queryKey: ["gastos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gastos")
+        .select("*")
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const handleObraChange = (index: number, obraId: string) => {
     const updated = [...lancamentos];
     updated[index].obra_id = obraId;
     onUpdate(updated);
   };
 
+  const handleGastoChange = (index: number, gastoId: string) => {
+    const updated = [...lancamentos];
+    updated[index].gasto_id = gastoId;
+    onUpdate(updated);
+  };
+
+  const handleTipoTransacaoChange = (index: number, tipo: string) => {
+    const updated = [...lancamentos];
+    updated[index].tipo_transacao = tipo;
+    onUpdate(updated);
+  };
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const custosToInsert = lancamentos
-        .filter((l) => l.obra_id)
+        .filter((l) => l.obra_id || l.gasto_id)
         .map((l) => ({
-          obra_id: l.obra_id,
+          obra_id: l.obra_id || null,
+          gasto_id: l.gasto_id || null,
+          tipo_transacao: l.tipo_transacao || null,
           data: l.data,
           valor: l.valor,
           documento: l.documento,
@@ -80,10 +106,10 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
   });
 
   const handleSave = () => {
-    const semObra = lancamentos.filter((l) => !l.obra_id).length;
+    const semAtribuicao = lancamentos.filter((l) => !l.obra_id && !l.gasto_id).length;
     
-    if (semObra > 0) {
-      if (!confirm(`${semObra} lançamentos sem obra serão ignorados. Continuar?`)) {
+    if (semAtribuicao > 0) {
+      if (!confirm(`${semAtribuicao} lançamentos sem central serão ignorados. Continuar?`)) {
         return;
       }
     }
@@ -92,7 +118,7 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
     saveMutation.mutate();
   };
 
-  const totalSelecionados = lancamentos.filter((l) => l.obra_id).length;
+  const totalSelecionados = lancamentos.filter((l) => l.obra_id || l.gasto_id).length;
 
   return (
     <Card>
@@ -113,7 +139,9 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
                 <TableHead>Nome</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
-                <TableHead className="w-[250px]">Obra</TableHead>
+                <TableHead className="w-[200px]">Central de Custos</TableHead>
+                <TableHead className="w-[200px]">Central de Gastos</TableHead>
+                <TableHead className="w-[150px]">Tipo Transação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -144,6 +172,37 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
                             {obra.nome}
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={lancamento.gasto_id || ""}
+                      onValueChange={(value) => handleGastoChange(index, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {gastos?.map((gasto) => (
+                          <SelectItem key={gasto.id} value={gasto.id}>
+                            {gasto.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={lancamento.tipo_transacao || ""}
+                      onValueChange={(value) => handleTipoTransacaoChange(index, value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Entrada">Entrada</SelectItem>
+                        <SelectItem value="Saída">Saída</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>

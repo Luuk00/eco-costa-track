@@ -5,6 +5,8 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const headers = [
     "Data",
     "Central de Custos",
+    "Central de Gastos",
+    "Tipo Transação",
     "Receptor/Destinatário",
     "Descrição",
     "Tipo",
@@ -12,18 +14,25 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
     "Valor",
   ];
 
-  const rows = custos.map((custo) => [
-    format(new Date(custo.data + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR }),
-    custo.obras?.nome || "-",
-    custo.receptor_destinatario || "-",
-    custo.descricao || "-",
-    custo.tipo_operacao || "-",
-    custo.observacao || "-",
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(custo.valor),
-  ]);
+  const rows = custos.map((custo) => {
+    const [ano, mes, dia] = custo.data.split('-');
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+    
+    return [
+      dataFormatada,
+      custo.obras?.nome || "-",
+      custo.gastos?.nome || "-",
+      custo.tipo_transacao || "-",
+      custo.receptor_destinatario || "-",
+      custo.descricao || "-",
+      custo.tipo_operacao || "-",
+      custo.observacao || "-",
+      new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(custo.valor),
+    ];
+  });
 
   const csvContent = [
     headers.join(","),
@@ -45,6 +54,8 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
   const headers = [
     "Data",
     "Central de Custos",
+    "Central de Gastos",
+    "Tipo Transação",
     "Receptor/Destinatário",
     "Descrição",
     "Tipo",
@@ -52,18 +63,25 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
     "Valor",
   ];
 
-  const rows = custos.map((custo) => [
-    format(new Date(custo.data + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR }),
-    custo.obras?.nome || "-",
-    custo.receptor_destinatario || "-",
-    custo.descricao || "-",
-    custo.tipo_operacao || "-",
-    custo.observacao || "-",
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(custo.valor),
-  ]);
+  const rows = custos.map((custo) => {
+    const [ano, mes, dia] = custo.data.split('-');
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+    
+    return [
+      dataFormatada,
+      custo.obras?.nome || "-",
+      custo.gastos?.nome || "-",
+      custo.tipo_transacao || "-",
+      custo.receptor_destinatario || "-",
+      custo.descricao || "-",
+      custo.tipo_operacao || "-",
+      custo.observacao || "-",
+      new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(custo.valor),
+    ];
+  });
 
   let htmlContent = `
     <!DOCTYPE html>
@@ -81,7 +99,7 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
       </style>
     </head>
     <body>
-      <h1>Relatório de Custos - EcoCosta Track</h1>
+      <h1>Relatório de Custos - MAP AMBIENTAL</h1>
       <p>Data de geração: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
       <table>
         <thead>
@@ -90,11 +108,14 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
         <tbody>
           ${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}
           <tr class="total">
-            <td colspan="6">Total:</td>
+            <td colspan="8">Total:</td>
             <td>${new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",
-            }).format(custos.reduce((sum, c) => sum + c.valor, 0))}</td>
+            }).format(custos.reduce((sum, c) => {
+              const valor = c.valor;
+              return c.tipo_transacao === 'Entrada' ? sum + valor : sum - valor;
+            }, 0))}</td>
           </tr>
         </tbody>
       </table>

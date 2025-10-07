@@ -49,6 +49,8 @@ export default function ImportarCSV() {
         valor: columns[10] ? parseFloat(columns[10].replace(",", ".")) : 0, // Coluna K
         nome: nome,
         obra_id: null,
+        gasto_id: null,
+        tipo_transacao: null,
       };
     });
 

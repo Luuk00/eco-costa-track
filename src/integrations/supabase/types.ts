@@ -21,11 +21,13 @@ export type Database = {
           data: string
           descricao: string | null
           documento: string | null
+          gasto_id: string | null
           id: string
           obra_id: string
           observacao: string | null
           receptor_destinatario: string | null
           tipo_operacao: string | null
+          tipo_transacao: string | null
           updated_at: string
           valor: number
         }
@@ -35,11 +37,13 @@ export type Database = {
           data: string
           descricao?: string | null
           documento?: string | null
+          gasto_id?: string | null
           id?: string
           obra_id: string
           observacao?: string | null
           receptor_destinatario?: string | null
           tipo_operacao?: string | null
+          tipo_transacao?: string | null
           updated_at?: string
           valor: number
         }
@@ -49,15 +53,24 @@ export type Database = {
           data?: string
           descricao?: string | null
           documento?: string | null
+          gasto_id?: string | null
           id?: string
           obra_id?: string
           observacao?: string | null
           receptor_destinatario?: string | null
           tipo_operacao?: string | null
+          tipo_transacao?: string | null
           updated_at?: string
           valor?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "custos_gasto_id_fkey"
+            columns: ["gasto_id"]
+            isOneToOne: false
+            referencedRelation: "gastos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "custos_obra_id_fkey"
             columns: ["obra_id"]
@@ -66,6 +79,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      gastos: {
+        Row: {
+          cliente: string
+          created_at: string
+          data_fim: string | null
+          data_inicio: string
+          id: string
+          nome: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          cliente: string
+          created_at?: string
+          data_fim?: string | null
+          data_inicio: string
+          id?: string
+          nome: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          cliente?: string
+          created_at?: string
+          data_fim?: string | null
+          data_inicio?: string
+          id?: string
+          nome?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       obras: {
         Row: {

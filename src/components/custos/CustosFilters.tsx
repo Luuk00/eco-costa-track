@@ -6,9 +6,12 @@ import { Download, FileDown } from "lucide-react";
 
 interface CustosFiltersProps {
   obras: any[];
+  gastos: any[];
   observacoes: string[];
   selectedObra: string;
   setSelectedObra: (value: string) => void;
+  selectedGasto: string;
+  setSelectedGasto: (value: string) => void;
   selectedTipo: string;
   setSelectedTipo: (value: string) => void;
   selectedObservacao: string;
@@ -23,9 +26,12 @@ interface CustosFiltersProps {
 
 export function CustosFilters({
   obras,
+  gastos,
   observacoes,
   selectedObra,
   setSelectedObra,
+  selectedGasto,
+  setSelectedGasto,
   selectedTipo,
   setSelectedTipo,
   selectedObservacao,
@@ -39,7 +45,7 @@ export function CustosFilters({
 }: CustosFiltersProps) {
   return (
     <div className="bg-card rounded-lg border border-border p-4 space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <Label>Central de Custos</Label>
           <Select value={selectedObra} onValueChange={setSelectedObra}>
@@ -51,6 +57,23 @@ export function CustosFilters({
               {obras?.map((obra) => (
                 <SelectItem key={obra.id} value={obra.id}>
                   {obra.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Central de Gastos</Label>
+          <Select value={selectedGasto} onValueChange={setSelectedGasto}>
+            <SelectTrigger>
+              <SelectValue placeholder="Todas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              {gastos?.map((gasto) => (
+                <SelectItem key={gasto.id} value={gasto.id}>
+                  {gasto.nome}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -74,7 +97,9 @@ export function CustosFilters({
             </SelectContent>
           </Select>
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <Label>Data Início</Label>
           <Input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />

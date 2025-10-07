@@ -32,6 +32,8 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
   const { register, handleSubmit, reset, setValue, watch } = useForm({
     defaultValues: {
       obra_id: "",
+      gasto_id: "",
+      tipo_transacao: "",
       data: "",
       valor: "",
       descricao: "",
@@ -44,12 +46,26 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
   });
 
   const obraId = watch("obra_id");
+  const gastoId = watch("gasto_id");
+  const tipoTransacao = watch("tipo_transacao");
 
   const { data: obras } = useQuery({
     queryKey: ["obras"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("obras")
+        .select("*")
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: gastos } = useQuery({
+    queryKey: ["gastos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gastos")
         .select("*")
         .order("nome");
       if (error) throw error;
@@ -64,7 +80,9 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
       const dataFormatada = dataLocal ? dataLocal.toISOString().split('T')[0] : '';
       
       reset({
-        obra_id: custo.obra_id,
+        obra_id: custo.obra_id || "",
+        gasto_id: custo.gasto_id || "",
+        tipo_transacao: custo.tipo_transacao || "",
         data: dataFormatada,
         valor: custo.valor,
         descricao: custo.descricao || "",
@@ -77,6 +95,8 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
     } else {
       reset({
         obra_id: "",
+        gasto_id: "",
+        tipo_transacao: "",
         data: "",
         valor: "",
         descricao: "",
@@ -129,18 +149,49 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
           <DialogTitle>{custo ? "Editar Custo" : "Novo Custo"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="obra_id">Central de Custos</Label>
+              <Select value={obraId} onValueChange={(value) => setValue("obra_id", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {obras?.map((obra) => (
+                    <SelectItem key={obra.id} value={obra.id}>
+                      {obra.nome} - {obra.cliente}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="gasto_id">Central de Gastos</Label>
+              <Select value={gastoId} onValueChange={(value) => setValue("gasto_id", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {gastos?.map((gasto) => (
+                    <SelectItem key={gasto.id} value={gasto.id}>
+                      {gasto.nome} - {gasto.cliente}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div>
-            <Label htmlFor="obra_id">Central de Custos</Label>
-            <Select value={obraId} onValueChange={(value) => setValue("obra_id", value)}>
+            <Label htmlFor="tipo_transacao">Tipo de Transação</Label>
+            <Select value={tipoTransacao} onValueChange={(value) => setValue("tipo_transacao", value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Selecione uma central de custos" />
+                <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
-                {obras?.map((obra) => (
-                  <SelectItem key={obra.id} value={obra.id}>
-                    {obra.nome} - {obra.cliente}
-                  </SelectItem>
-                ))}
+                <SelectItem value="Entrada">Entrada</SelectItem>
+                <SelectItem value="Saída">Saída</SelectItem>
               </SelectContent>
             </Select>
           </div>

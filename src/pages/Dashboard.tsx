@@ -27,10 +27,31 @@ export default function Dashboard() {
     },
   });
 
+  const { data: gastos } = useQuery({
+    queryKey: ["gastos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gastos")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const totalObras = obras?.length || 0;
   const obrasEmAndamento = obras?.filter((o) => o.status === "em andamento").length || 0;
   const obrasConcluidas = obras?.filter((o) => o.status === "concluída").length || 0;
-  const totalCustos = custos?.reduce((sum, c) => sum + Number(c.valor), 0) || 0;
+  
+  const totalGastos = gastos?.length || 0;
+  const gastosEmAndamento = gastos?.filter((g) => g.status === "em andamento").length || 0;
+  const gastosConcluidos = gastos?.filter((g) => g.status === "concluída").length || 0;
+  
+  // Calcular total considerando Entrada (+) e Saída (-)
+  const totalCustos = custos?.reduce((sum, c) => {
+    const valor = Number(c.valor);
+    return c.tipo_transacao === 'Entrada' ? sum + valor : sum - valor;
+  }, 0) || 0;
 
   return (
     <div className="space-y-6">
@@ -124,22 +145,54 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Resumo Financeiro</CardTitle>
+            <CardTitle>Centrais de Custos - Resumo Financeiro</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {obras?.slice(0, 5).map((obra) => {
                 const custoObra = custos?.filter((c) => c.obra_id === obra.id)
-                  .reduce((sum, c) => sum + Number(c.valor), 0) || 0;
+                  .reduce((sum, c) => {
+                    const valor = Number(c.valor);
+                    return c.tipo_transacao === 'Entrada' ? sum + valor : sum - valor;
+                  }, 0) || 0;
                 
                 return (
                   <div key={obra.id} className="flex items-center justify-between border-b border-border pb-2 last:border-0">
                     <p className="text-sm font-medium text-foreground">{obra.nome}</p>
-                    <p className="text-sm font-bold text-secondary">
+                    <p className={`text-sm font-bold ${custoObra >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {new Intl.NumberFormat("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       }).format(custoObra)}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Centrais de Gastos - Resumo Financeiro</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {gastos?.slice(0, 5).map((gasto) => {
+                const custoGasto = custos?.filter((c) => c.gasto_id === gasto.id)
+                  .reduce((sum, c) => {
+                    const valor = Number(c.valor);
+                    return c.tipo_transacao === 'Entrada' ? sum + valor : sum - valor;
+                  }, 0) || 0;
+                
+                return (
+                  <div key={gasto.id} className="flex items-center justify-between border-b border-border pb-2 last:border-0">
+                    <p className="text-sm font-medium text-foreground">{gasto.nome}</p>
+                    <p className={`text-sm font-bold ${custoGasto >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {new Intl.NumberFormat("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }).format(custoGasto)}
                     </p>
                   </div>
                 );

@@ -38,6 +38,8 @@ export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTable
           <TableRow>
             <TableHead>Data</TableHead>
             <TableHead>Central de Custos</TableHead>
+            <TableHead>Central de Gastos</TableHead>
+            <TableHead>Tipo Transação</TableHead>
             <TableHead>Receptor/Destinatário</TableHead>
             <TableHead>Descrição</TableHead>
             <TableHead>Tipo</TableHead>
@@ -59,6 +61,16 @@ export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTable
               </TableCell>
               <TableCell className="font-medium">
                 {custo.obras?.nome || "-"}
+              </TableCell>
+              <TableCell className="font-medium">
+                {custo.gastos?.nome || "-"}
+              </TableCell>
+              <TableCell>
+                {custo.tipo_transacao ? (
+                  <span className={custo.tipo_transacao === 'Entrada' ? 'text-green-600' : 'text-red-600'}>
+                    {custo.tipo_transacao}
+                  </span>
+                ) : "-"}
               </TableCell>
               <TableCell>{custo.receptor_destinatario || "-"}</TableCell>
               <TableCell>{custo.descricao || "-"}</TableCell>

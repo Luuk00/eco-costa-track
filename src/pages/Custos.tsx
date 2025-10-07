@@ -13,6 +13,7 @@ export default function Custos() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCusto, setEditingCusto] = useState<any>(null);
   const [selectedObra, setSelectedObra] = useState("all");
+  const [selectedGasto, setSelectedGasto] = useState("all");
   const [selectedTipo, setSelectedTipo] = useState("all");
   const [selectedObservacao, setSelectedObservacao] = useState("all");
   const [dataInicio, setDataInicio] = useState("");
@@ -27,6 +28,9 @@ export default function Custos() {
         .select(`
           *,
           obras:obra_id (
+            nome
+          ),
+          gastos:gasto_id (
             nome
           )
         `)
@@ -48,6 +52,18 @@ export default function Custos() {
     },
   });
 
+  const { data: gastos } = useQuery({
+    queryKey: ["gastos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("gastos")
+        .select("*")
+        .order("nome");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   // Obter observações únicas para o filtro
   const observacoesUnicas = Array.from(
     new Set(custos?.map((c) => c.observacao).filter((obs) => obs && obs.trim() !== ""))
@@ -56,6 +72,7 @@ export default function Custos() {
   // Filtrar custos
   const custosFiltrados = custos?.filter((custo) => {
     if (selectedObra !== "all" && custo.obra_id !== selectedObra) return false;
+    if (selectedGasto !== "all" && custo.gasto_id !== selectedGasto) return false;
     if (selectedTipo !== "all" && custo.tipo_operacao !== selectedTipo) return false;
     if (selectedObservacao !== "all" && custo.observacao !== selectedObservacao) return false;
     if (dataInicio && custo.data < dataInicio) return false;
@@ -117,9 +134,12 @@ export default function Custos() {
 
       <CustosFilters
         obras={obras || []}
+        gastos={gastos || []}
         observacoes={observacoesUnicas}
         selectedObra={selectedObra}
         setSelectedObra={setSelectedObra}
+        selectedGasto={selectedGasto}
+        setSelectedGasto={setSelectedGasto}
         selectedTipo={selectedTipo}
         setSelectedTipo={setSelectedTipo}
         selectedObservacao={selectedObservacao}

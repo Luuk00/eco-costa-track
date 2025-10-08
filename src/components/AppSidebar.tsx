@@ -15,7 +15,7 @@ import {
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Central de Custos", url: "/obras", icon: Building2 },
-  { title: "Central de Gastos", url: "/gastos", icon: Wallet },
+  { title: "Obra/Projeto", url: "/gastos", icon: Wallet },
   { title: "Custos", url: "/custos", icon: DollarSign },
   { title: "Importar CSV", url: "/importar", icon: Upload },
 ];

@@ -64,7 +64,7 @@ export function CustosFilters({
         </div>
 
         <div>
-          <Label>Central de Gastos</Label>
+          <Label>Obra/Projeto</Label>
           <Select value={selectedGasto} onValueChange={setSelectedGasto}>
             <SelectTrigger>
               <SelectValue placeholder="Todas" />

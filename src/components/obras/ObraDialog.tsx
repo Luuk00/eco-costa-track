@@ -31,9 +31,6 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
   const { register, handleSubmit, reset, setValue, watch } = useForm({
     defaultValues: {
       nome: "",
-      cliente: "",
-      data_inicio: "",
-      data_fim: "",
       status: "em andamento",
     },
   });
@@ -44,17 +41,11 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
     if (obra) {
       reset({
         nome: obra.nome,
-        cliente: obra.cliente,
-        data_inicio: obra.data_inicio,
-        data_fim: obra.data_fim || "",
         status: obra.status,
       });
     } else {
       reset({
         nome: "",
-        cliente: "",
-        data_inicio: "",
-        data_fim: "",
         status: "em andamento",
       });
     }
@@ -85,11 +76,7 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
   });
 
   const onSubmit = (data: any) => {
-    const payload = {
-      ...data,
-      data_fim: data.data_fim || null,
-    };
-    mutation.mutate(payload);
+    mutation.mutate(data);
   };
 
   return (
@@ -102,27 +89,6 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
           <div>
             <Label htmlFor="nome">Nome da Central de Custos</Label>
             <Input id="nome" {...register("nome", { required: true })} />
-          </div>
-
-          <div>
-            <Label htmlFor="cliente">Cliente</Label>
-            <Input id="cliente" {...register("cliente", { required: true })} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="data_inicio">Data de Início</Label>
-              <Input
-                id="data_inicio"
-                type="date"
-                {...register("data_inicio", { required: true })}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="data_fim">Data de Fim</Label>
-              <Input id="data_fim" type="date" {...register("data_fim")} />
-            </div>
           </div>
 
           <div>

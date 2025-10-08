@@ -38,7 +38,7 @@ export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTable
           <TableRow>
             <TableHead>Data</TableHead>
             <TableHead>Central de Custos</TableHead>
-            <TableHead>Central de Gastos</TableHead>
+            <TableHead>Obra/Projeto</TableHead>
             <TableHead>Tipo Transação</TableHead>
             <TableHead>Receptor/Destinatário</TableHead>
             <TableHead>Descrição</TableHead>

@@ -67,14 +67,14 @@ export default function Gastos() {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Central de Gastos</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Obra/Projeto</h1>
           <p className="text-muted-foreground mt-2">
-            Gerencie todos os gastos do projeto
+            Gerencie todas as obras/projetos
           </p>
         </div>
         <Button onClick={handleNewGasto}>
           <Plus className="mr-2 h-4 w-4" />
-          Novo Gasto
+          Nova Obra/Projeto
         </Button>
       </div>
 

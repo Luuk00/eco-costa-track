@@ -105,13 +105,13 @@ export function GastoDialog({ open, onOpenChange, gasto }: GastoDialogProps) {
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {gasto ? "Editar Gasto" : "Novo Gasto"}
+            {gasto ? "Editar Obra/Projeto" : "Nova Obra/Projeto"}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="nome">Nome do Gasto</Label>
+            <Label htmlFor="nome">Nome da Obra/Projeto</Label>
             <Input id="nome" {...register("nome")} required />
           </div>
 

@@ -174,7 +174,7 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Centrais de Gastos - Resumo Financeiro</CardTitle>
+            <CardTitle>Obras/Projetos - Resumo Financeiro</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">

@@ -140,7 +140,7 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
                 <TableHead>Tipo</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
                 <TableHead className="w-[200px]">Central de Custos</TableHead>
-                <TableHead className="w-[200px]">Central de Gastos</TableHead>
+                <TableHead className="w-[200px]">Obra/Projeto</TableHead>
                 <TableHead className="w-[150px]">Tipo Transação</TableHead>
               </TableRow>
             </TableHeader>

@@ -5,7 +5,7 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const headers = [
     "Data",
     "Central de Custos",
-    "Central de Gastos",
+    "Obra/Projeto",
     "Tipo Transação",
     "Receptor/Destinatário",
     "Descrição",
@@ -13,6 +13,16 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
     "Observação",
     "Valor",
   ];
+
+  const totalEntradas = custos
+    .filter(c => c.tipo_transacao === 'Entrada')
+    .reduce((sum, c) => sum + c.valor, 0);
+  
+  const totalSaidas = custos
+    .filter(c => c.tipo_transacao === 'Saída')
+    .reduce((sum, c) => sum + c.valor, 0);
+  
+  const totalLiquido = totalEntradas - totalSaidas;
 
   const rows = custos.map((custo) => {
     const [ano, mes, dia] = custo.data.split('-');
@@ -37,6 +47,10 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const csvContent = [
     headers.join(","),
     ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+    "",
+    `"","","","","","","","Total de Entradas:","${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalEntradas)}"`,
+    `"","","","","","","","Total de Saídas:","${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalSaidas)}"`,
+    `"","","","","","","","Total Líquido (Entradas - Saídas):","${new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(totalLiquido)}"`,
   ].join("\n");
 
   const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
@@ -54,7 +68,7 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
   const headers = [
     "Data",
     "Central de Custos",
-    "Central de Gastos",
+    "Obra/Projeto",
     "Tipo Transação",
     "Receptor/Destinatário",
     "Descrição",
@@ -62,6 +76,16 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
     "Observação",
     "Valor",
   ];
+
+  const totalEntradas = custos
+    .filter(c => c.tipo_transacao === 'Entrada')
+    .reduce((sum, c) => sum + c.valor, 0);
+  
+  const totalSaidas = custos
+    .filter(c => c.tipo_transacao === 'Saída')
+    .reduce((sum, c) => sum + c.valor, 0);
+  
+  const totalLiquido = totalEntradas - totalSaidas;
 
   const rows = custos.map((custo) => {
     const [ano, mes, dia] = custo.data.split('-');
@@ -108,7 +132,21 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
         <tbody>
           ${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}
           <tr class="total">
-            <td colspan="8">Total:</td>
+            <td colspan="8">Total de Entradas:</td>
+            <td>${new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(custos.filter(c => c.tipo_transacao === 'Entrada').reduce((sum, c) => sum + c.valor, 0))}</td>
+          </tr>
+          <tr class="total">
+            <td colspan="8">Total de Saídas:</td>
+            <td>${new Intl.NumberFormat("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            }).format(custos.filter(c => c.tipo_transacao === 'Saída').reduce((sum, c) => sum + c.valor, 0))}</td>
+          </tr>
+          <tr class="total">
+            <td colspan="8">Total Líquido (Entradas - Saídas):</td>
             <td>${new Intl.NumberFormat("pt-BR", {
               style: "currency",
               currency: "BRL",

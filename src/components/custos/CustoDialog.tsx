@@ -167,7 +167,7 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
             </div>
 
             <div>
-              <Label htmlFor="gasto_id">Central de Gastos</Label>
+              <Label htmlFor="gasto_id">Obra/Projeto</Label>
               <Select value={gastoId} onValueChange={(value) => setValue("gasto_id", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione" />
@@ -199,7 +199,12 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="data">Data</Label>
-              <Input id="data" type="date" {...register("data", { required: true })} />
+              <Input 
+                id="data" 
+                type="date" 
+                {...register("data", { required: true })}
+                disabled={!!custo?.codigo_operacao}
+              />
             </div>
 
             <div>

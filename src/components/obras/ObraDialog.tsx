@@ -32,6 +32,9 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
     defaultValues: {
       nome: "",
       status: "em andamento",
+      cliente: "",
+      data_inicio: "",
+      data_fim: "",
     },
   });
 
@@ -42,11 +45,17 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
       reset({
         nome: obra.nome,
         status: obra.status,
+        cliente: obra.cliente || "",
+        data_inicio: obra.data_inicio || "",
+        data_fim: obra.data_fim || "",
       });
     } else {
       reset({
         nome: "",
         status: "em andamento",
+        cliente: "",
+        data_inicio: new Date().toISOString().split('T')[0],
+        data_fim: "",
       });
     }
   }, [obra, reset]);

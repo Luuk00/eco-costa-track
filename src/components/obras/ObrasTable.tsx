@@ -38,9 +38,6 @@ export function ObrasTable({ obras, isLoading, onEdit, onDelete, onViewDetails }
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>Cliente</TableHead>
-            <TableHead>Data Início</TableHead>
-            <TableHead>Data Fim</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -49,15 +46,6 @@ export function ObrasTable({ obras, isLoading, onEdit, onDelete, onViewDetails }
           {obras.map((obra) => (
             <TableRow key={obra.id}>
               <TableCell className="font-medium">{obra.nome}</TableCell>
-              <TableCell>{obra.cliente}</TableCell>
-              <TableCell>
-                {format(new Date(obra.data_inicio + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR })}
-              </TableCell>
-              <TableCell>
-                {obra.data_fim
-                  ? format(new Date(obra.data_fim + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR })
-                  : "-"}
-              </TableCell>
               <TableCell>
                 <span
                   className={`text-xs px-2 py-1 rounded-full ${

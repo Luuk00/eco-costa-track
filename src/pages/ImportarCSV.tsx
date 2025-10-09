@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { ImportPreview } from "@/components/importar/ImportPreview";
+import { csvBBDateToISO } from "@/lib/dateUtils";
 
 export default function ImportarCSV() {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
@@ -30,6 +31,7 @@ export default function ImportarCSV() {
       
       // Converter data de DD/MM/AAAA para formato ISO (YYYY-MM-DD)
       const dataOriginal = columns[3]?.trim() || "";
+      const dataFormatada = csvBBDateToISO(dataOriginal);
       let dataFormatada = "";
       
       if (dataOriginal && dataOriginal.includes("/")) {
@@ -41,11 +43,11 @@ export default function ImportarCSV() {
       
       return {
         data: dataFormatada,
-        documento: columns[7] || "", // Coluna H
-        codigo_operacao: columns[8] || "", // Coluna I
-        tipo_operacao: columns[9] || "", // Coluna J
-        valor: columns[10] ? parseFloat(columns[10].replace(",", ".")) : 0, // Coluna K
-        nome: nome,
+        documento: columns[7] || "",
+        codigo_operacao: columns[8] || "",
+        tipo_operacao: columns[9] || "",
+        valor: columns[10] ? parseFloat(columns[10].replace(",", ".")) : 0,
+        nome,
         obra_id: null,
         gasto_id: null,
         tipo_transacao: null,

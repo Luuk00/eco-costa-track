@@ -34,7 +34,41 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
       custo.tipo_operacao || "",
     ];
   });
-
+        let dataFormatada = "-";
+    if (custo.data) {
+      try {
+        let dataFormatada = "-";
+          if (custo.data) {
+            const partes = custo.data.split("-");
+            if (partes.length === 3) {
+              const [ano, mes, dia] = partes;
+              dataFormatada = `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${ano}`;
+            } else if (custo.data.includes("/")) {
+              // se já estiver em DD/MM/YYYY
+              dataFormatada = custo.data;
+            } else {
+              try {
+                const dataFormatada = isoToPtBr(String(custo.data));
+                dataFormatada = dataObj.toLocaleDateString("pt-BR");
+              } catch {
+                dataFormatada = custo.data;
+              }
+            }
+          } else {
+          // se não for um formato padrão ISO
+          const partes = custo.data.split(/[-/]/);
+          if (partes.length === 3) {
+            if (partes[0].length === 4) {
+              dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            } else {
+              dataFormatada = `${partes[0]}/${partes[1]}/${partes[2]}`;
+            }
+          }
+        }
+      } catch {
+        dataFormatada = custo.data;
+      }
+    }
     
     return [
       dataFormatada,

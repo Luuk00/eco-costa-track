@@ -78,22 +78,11 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
       const custosToInsert = lancamentos
         .filter((l) => l.obra_id || l.gasto_id)
         .map((l) => {
-          // Validar formato da data YYYY-MM-DD
+          // Validar apenas formato da data YYYY-MM-DD
           const datePattern = /^\d{4}-\d{2}-\d{2}$/;
           if (!datePattern.test(l.data)) {
-            throw new Error(`Data inválida: ${l.data}`);
-          }
-          
-          // Validar valores de dia e mês
-          const [ano, mes, dia] = l.data.split('-');
-          const mesNum = parseInt(mes);
-          const diaNum = parseInt(dia);
-          
-          if (mesNum < 1 || mesNum > 12) {
-            throw new Error(`Mês inválido: ${mes} na data ${l.data}`);
-          }
-          if (diaNum < 1 || diaNum > 31) {
-            throw new Error(`Dia inválido: ${dia} na data ${l.data}`);
+            console.warn(`Data com formato inválido: ${l.data} - lançamento será ignorado`);
+            return null;
           }
           
           return {
@@ -108,7 +97,8 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
             receptor_destinatario: l.nome,
             descricao: `Importado de CSV - ${l.tipo_operacao}`,
           };
-        });
+        })
+        .filter(Boolean);
 
       const { error } = await supabase.from("custos").insert(custosToInsert);
       if (error) throw error;

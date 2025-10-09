@@ -28,11 +28,11 @@ export default function ImportarCSV() {
       // Remover números iniciais se começar com dígitos
       nome = nome.replace(/^\d+[\s\/\-:]*/g, "").trim();
       
-      // Converter data de DD/MM/AAAA para AAAA-MM-DD
+      // Converter data de DD/MM/AAAA ou DD.MM.AAAA para AAAA-MM-DD
       const dataOriginal = columns[3] || "";
       let dataFormatada = dataOriginal;
-      if (dataOriginal && dataOriginal.includes("/")) {
-        const partes = dataOriginal.split("/");
+      if (dataOriginal && (dataOriginal.includes("/") || dataOriginal.includes("."))) {
+        const partes = dataOriginal.split(/[\/.]/);
         if (partes.length === 3) {
           const dia = partes[0].padStart(2, "0");
           const mes = partes[1].padStart(2, "0");

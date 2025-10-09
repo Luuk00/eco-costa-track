@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { isoToPtBr } from "@/lib/dateUtils";
 
 export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const headers = [
@@ -25,41 +26,15 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const totalLiquido = totalEntradas - totalSaidas;
 
   const rows = custos.map((custo) => {
-        let dataFormatada = "-";
-    if (custo.data) {
-      try {
-        let dataFormatada = "-";
-          if (custo.data) {
-            const partes = custo.data.split("-");
-            if (partes.length === 3) {
-              const [ano, mes, dia] = partes;
-              dataFormatada = `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${ano}`;
-            } else if (custo.data.includes("/")) {
-              // se já estiver em DD/MM/YYYY
-              dataFormatada = custo.data;
-            } else {
-              try {
-                const dataObj = new Date(custo.data);
-                dataFormatada = dataObj.toLocaleDateString("pt-BR");
-              } catch {
-                dataFormatada = custo.data;
-              }
-            }
-          } else {
-          // se não for um formato padrão ISO
-          const partes = custo.data.split(/[-/]/);
-          if (partes.length === 3) {
-            if (partes[0].length === 4) {
-              dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
-            } else {
-              dataFormatada = `${partes[0]}/${partes[1]}/${partes[2]}`;
-            }
-          }
-        }
-      } catch {
-        dataFormatada = custo.data;
-      }
-    }
+    const dataFormatada = isoToPtBr(String(custo.data));
+    return [
+      dataFormatada,
+      custo.descricao || "",
+      custo.valor?.toFixed(2) || "0.00",
+      custo.tipo_operacao || "",
+    ];
+  });
+
     
     return [
       dataFormatada,
@@ -120,9 +95,42 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
   
   const totalLiquido = totalEntradas - totalSaidas;
 
-  const rows = custos.map((custo) => {
-    const [ano, mes, dia] = custo.data.split('-');
-    const dataFormatada = `${dia}/${mes}/${ano}`;
+  const rows = custos.map((custo) => { 
+    let dataFormatada = "-";
+    if (custo.data) {
+      try {
+        let dataFormatada = "-";
+          if (custo.data) {
+            const partes = custo.data.split("-");
+            if (partes.length === 3) {
+              const [ano, mes, dia] = partes;
+              dataFormatada = `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${ano}`;
+            } else if (custo.data.includes("/")) {
+              // se já estiver em DD/MM/YYYY
+              dataFormatada = custo.data;
+            } else {
+              try {
+                const dataFormatada = isoToPtBr(String(custo.data));
+                dataFormatada = dataObj.toLocaleDateString("pt-BR");
+              } catch {
+                dataFormatada = custo.data;
+              }
+            }
+          } else {
+          // se não for um formato padrão ISO
+          const partes = custo.data.split(/[-/]/);
+          if (partes.length === 3) {
+            if (partes[0].length === 4) {
+              dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            } else {
+              dataFormatada = `${partes[0]}/${partes[1]}/${partes[2]}`;
+            }
+          }
+        }
+      } catch {
+        dataFormatada = custo.data;
+      }
+    }
     
     return [
       dataFormatada,

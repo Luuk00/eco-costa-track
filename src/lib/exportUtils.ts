@@ -28,10 +28,24 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
         let dataFormatada = "-";
     if (custo.data) {
       try {
-        const dataObj = new Date(custo.data);
-        if (!isNaN(dataObj.getTime())) {
-          dataFormatada = dataObj.toLocaleDateString("pt-BR");
-        } else {
+        let dataFormatada = "-";
+          if (custo.data) {
+            const partes = custo.data.split("-");
+            if (partes.length === 3) {
+              const [ano, mes, dia] = partes;
+              dataFormatada = `${dia.padStart(2, "0")}/${mes.padStart(2, "0")}/${ano}`;
+            } else if (custo.data.includes("/")) {
+              // se já estiver em DD/MM/YYYY
+              dataFormatada = custo.data;
+            } else {
+              try {
+                const dataObj = new Date(custo.data);
+                dataFormatada = dataObj.toLocaleDateString("pt-BR");
+              } catch {
+                dataFormatada = custo.data;
+              }
+            }
+          } else {
           // se não for um formato padrão ISO
           const partes = custo.data.split(/[-/]/);
           if (partes.length === 3) {

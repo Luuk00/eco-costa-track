@@ -115,32 +115,26 @@ export type Database = {
       }
       obras: {
         Row: {
-          cliente: string
           created_at: string
-          data_fim: string | null
-          data_inicio: string
           id: string
           nome: string
+          observacao: string
           status: string
           updated_at: string
         }
         Insert: {
-          cliente: string
           created_at?: string
-          data_fim?: string | null
-          data_inicio: string
           id?: string
           nome: string
+          observacao: string
           status?: string
           updated_at?: string
         }
         Update: {
-          cliente?: string
           created_at?: string
-          data_fim?: string | null
-          data_inicio?: string
           id?: string
           nome?: string
+          observacao?: string
           status?: string
           updated_at?: string
         }

@@ -66,7 +66,7 @@ export default function ObraDetalhes() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold text-foreground">{obra.nome}</h1>
-          <p className="text-muted-foreground">{obra.cliente}</p>
+          <p className="text-muted-foreground">{obra.observacao || "-"}</p>
         </div>
       </div>
 
@@ -124,16 +124,8 @@ export default function ObraDetalhes() {
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">Data Início</p>
-              <p className="font-medium">
-                {obra.data_inicio ? format(new Date(obra.data_inicio + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR }) : "-"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Data Fim</p>
-              <p className="font-medium">
-                {obra.data_fim ? format(new Date(obra.data_fim + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR }) : "-"}
-              </p>
+              <p className="text-sm text-muted-foreground">Observação</p>
+              <p className="font-medium">{obra.observacao || "-"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Status</p>

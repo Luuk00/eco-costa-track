@@ -47,11 +47,14 @@ export default function Dashboard() {
   const gastosEmAndamento = gastos?.filter((g) => g.status === "em andamento").length || 0;
   const gastosConcluidos = gastos?.filter((g) => g.status === "concluída").length || 0;
   
-  // Calcular total considerando Entrada (+) e Saída (-)
-  const totalCustos = custos?.reduce((sum, c) => {
-    const valor = Number(c.valor);
-    return c.tipo_transacao === 'Entrada' ? sum + valor : sum - valor;
-  }, 0) || 0;
+  // Calcular totais separados
+  const totalEntradas = custos?.filter(c => c.tipo_transacao === 'Entrada')
+    .reduce((sum, c) => sum + Number(c.valor), 0) || 0;
+
+  const totalSaidas = custos?.filter(c => c.tipo_transacao === 'Saída')
+    .reduce((sum, c) => sum + Number(c.valor), 0) || 0;
+
+  const totalLiquido = totalEntradas - totalSaidas;
 
   return (
     <div className="space-y-6">
@@ -60,7 +63,7 @@ export default function Dashboard() {
         <p className="text-muted-foreground">Visão geral do sistema de gestão de centrais de custos</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Centrais</CardTitle>
@@ -96,17 +99,49 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Custos</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Total de Entradas</CardTitle>
+            <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-secondary">
+            <div className="text-2xl font-bold text-green-600">
               {new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              }).format(totalCustos)}
+              }).format(totalEntradas)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Soma de todos os custos</p>
+            <p className="text-xs text-muted-foreground mt-1">Soma de todas as entradas</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Saídas</CardTitle>
+            <DollarSign className="h-4 w-4 text-red-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(totalSaidas)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Soma de todas as saídas</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Líquido</CardTitle>
+            <DollarSign className="h-4 w-4 text-secondary" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${totalLiquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(totalLiquido)}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Entradas - Saídas</p>
           </CardContent>
         </Card>
       </div>
@@ -123,7 +158,7 @@ export default function Dashboard() {
                   <div key={obra.id} className="flex items-center justify-between border-b border-border pb-2 last:border-0">
                     <div>
                       <p className="font-medium text-foreground">{obra.nome}</p>
-                      <p className="text-sm text-muted-foreground">{obra.cliente}</p>
+                      <p className="text-sm text-muted-foreground">{obra.observacao || "-"}</p>
                     </div>
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       obra.status === "em andamento" 

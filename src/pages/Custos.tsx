@@ -18,6 +18,7 @@ export default function Custos() {
   const [selectedObservacao, setSelectedObservacao] = useState("all");
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
+  const [ordenacaoData, setOrdenacaoData] = useState<"asc" | "desc">("desc");
   const queryClient = useQueryClient();
 
   const { data: custos, isLoading } = useQuery({
@@ -69,7 +70,7 @@ export default function Custos() {
     new Set(custos?.map((c) => c.observacao).filter((obs) => obs && obs.trim() !== ""))
   ).sort();
 
-  // Filtrar custos
+  // Filtrar e ordenar custos
   const custosFiltrados = custos?.filter((custo) => {
     if (selectedObra !== "all" && custo.obra_id !== selectedObra) return false;
     if (selectedGasto !== "all" && custo.gasto_id !== selectedGasto) return false;
@@ -78,6 +79,12 @@ export default function Custos() {
     if (dataInicio && custo.data < dataInicio) return false;
     if (dataFim && custo.data > dataFim) return false;
     return true;
+  }).sort((a, b) => {
+    if (ordenacaoData === "asc") {
+      return a.data.localeCompare(b.data);
+    } else {
+      return b.data.localeCompare(a.data);
+    }
   }) || [];
 
   const deleteMutation = useMutation({
@@ -119,6 +126,15 @@ export default function Custos() {
     exportToPDF(custosFiltrados, "custos");
   };
 
+  const handleLimparFiltros = () => {
+    setSelectedObra("all");
+    setSelectedGasto("all");
+    setSelectedTipo("all");
+    setSelectedObservacao("all");
+    setDataInicio("");
+    setDataFim("");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -150,6 +166,7 @@ export default function Custos() {
         setDataFim={setDataFim}
         onExportCSV={handleExportCSV}
         onExportPDF={handleExportPDF}
+        onLimparFiltros={handleLimparFiltros}
       />
 
       <CustosTable
@@ -157,6 +174,8 @@ export default function Custos() {
         isLoading={isLoading}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        ordenacaoData={ordenacaoData}
+        setOrdenacaoData={setOrdenacaoData}
       />
 
       <CustoDialog

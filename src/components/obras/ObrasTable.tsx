@@ -38,6 +38,7 @@ export function ObrasTable({ obras, isLoading, onEdit, onDelete, onViewDetails }
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
+            <TableHead>Observação</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -46,6 +47,7 @@ export function ObrasTable({ obras, isLoading, onEdit, onDelete, onViewDetails }
           {obras.map((obra) => (
             <TableRow key={obra.id}>
               <TableCell className="font-medium">{obra.nome}</TableCell>
+              <TableCell className="text-muted-foreground">{obra.observacao || "-"}</TableCell>
               <TableCell>
                 <span
                   className={`text-xs px-2 py-1 rounded-full ${

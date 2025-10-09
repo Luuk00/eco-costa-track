@@ -32,9 +32,7 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
     defaultValues: {
       nome: "",
       status: "em andamento",
-      cliente: "",
-      data_inicio: "",
-      data_fim: "",
+      observacao: "",
     },
   });
 
@@ -45,17 +43,13 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
       reset({
         nome: obra.nome,
         status: obra.status,
-        cliente: obra.cliente || "",
-        data_inicio: obra.data_inicio || "",
-        data_fim: obra.data_fim || "",
+        observacao: obra.observacao || "",
       });
     } else {
       reset({
         nome: "",
         status: "em andamento",
-        cliente: "",
-        data_inicio: new Date().toISOString().split('T')[0],
-        data_fim: "",
+        observacao: "",
       });
     }
   }, [obra, reset]);
@@ -85,7 +79,12 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
   });
 
   const onSubmit = (data: any) => {
-    mutation.mutate(data);
+    const cleanData = {
+      nome: data.nome,
+      status: data.status,
+      observacao: data.observacao || null,
+    };
+    mutation.mutate(cleanData);
   };
 
   return (
@@ -98,6 +97,11 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
           <div>
             <Label htmlFor="nome">Nome da Central de Custos</Label>
             <Input id="nome" {...register("nome", { required: true })} />
+          </div>
+
+          <div>
+            <Label htmlFor="observacao">Observação</Label>
+            <Input id="observacao" {...register("observacao")} />
           </div>
 
           <div>

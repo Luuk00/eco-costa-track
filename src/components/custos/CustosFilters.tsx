@@ -22,6 +22,7 @@ interface CustosFiltersProps {
   setDataFim: (value: string) => void;
   onExportCSV: () => void;
   onExportPDF: () => void;
+  onLimparFiltros: () => void;
 }
 
 export function CustosFilters({
@@ -42,6 +43,7 @@ export function CustosFilters({
   setDataFim,
   onExportCSV,
   onExportPDF,
+  onLimparFiltros,
 }: CustosFiltersProps) {
   return (
     <div className="bg-card rounded-lg border border-border p-4 space-y-4">
@@ -128,15 +130,20 @@ export function CustosFilters({
         </div>
       </div>
 
-      <div className="flex gap-2 justify-end">
-        <Button variant="outline" onClick={onExportCSV}>
-          <Download className="mr-2 h-4 w-4" />
-          Exportar CSV
+      <div className="flex gap-2 justify-between">
+        <Button variant="outline" onClick={onLimparFiltros}>
+          Limpar Filtros
         </Button>
-        <Button variant="outline" onClick={onExportPDF}>
-          <FileDown className="mr-2 h-4 w-4" />
-          Exportar PDF
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onExportCSV}>
+            <Download className="mr-2 h-4 w-4" />
+            Exportar CSV
+          </Button>
+          <Button variant="outline" onClick={onExportPDF}>
+            <FileDown className="mr-2 h-4 w-4" />
+            Exportar PDF
+          </Button>
+        </div>
       </div>
     </div>
   );

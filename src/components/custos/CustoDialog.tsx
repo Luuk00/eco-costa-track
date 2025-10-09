@@ -159,7 +159,7 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
                 <SelectContent>
                   {obras?.map((obra) => (
                     <SelectItem key={obra.id} value={obra.id}>
-                      {obra.nome} - {obra.cliente}
+                      {obra.nome}{obra.observacao ? ` - ${obra.observacao}` : ''}
                     </SelectItem>
                   ))}
                 </SelectContent>

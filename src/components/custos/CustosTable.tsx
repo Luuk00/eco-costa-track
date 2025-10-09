@@ -16,9 +16,11 @@ interface CustosTableProps {
   isLoading: boolean;
   onEdit: (custo: any) => void;
   onDelete: (id: string) => void;
+  ordenacaoData: "asc" | "desc";
+  setOrdenacaoData: (ordenacao: "asc" | "desc") => void;
 }
 
-export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTableProps) {
+export function CustosTable({ custos, isLoading, onEdit, onDelete, ordenacaoData, setOrdenacaoData }: CustosTableProps) {
   if (isLoading) {
     return <div className="text-center py-8 text-muted-foreground">Carregando...</div>;
   }
@@ -36,7 +38,19 @@ export function CustosTable({ custos, isLoading, onEdit, onDelete }: CustosTable
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Data</TableHead>
+            <TableHead>
+              <div className="flex items-center gap-2">
+                Data
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setOrdenacaoData(ordenacaoData === "asc" ? "desc" : "asc")}
+                  className="h-6 w-6 p-0"
+                >
+                  {ordenacaoData === "asc" ? "↑" : "↓"}
+                </Button>
+              </div>
+            </TableHead>
             <TableHead>Central de Custos</TableHead>
             <TableHead>Obra/Projeto</TableHead>
             <TableHead>Tipo Transação</TableHead>

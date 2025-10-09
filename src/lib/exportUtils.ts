@@ -25,7 +25,8 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const totalLiquido = totalEntradas - totalSaidas;
 
   const rows = custos.map((custo) => {
-    const dataFormatada = format(new Date(custo.data + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR });
+    const [ano, mes, dia] = custo.data.split('-');
+    const dataFormatada = `${dia}/${mes}/${ano}`;
     
     return [
       dataFormatada,
@@ -87,7 +88,8 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
   const totalLiquido = totalEntradas - totalSaidas;
 
   const rows = custos.map((custo) => {
-    const dataFormatada = format(new Date(custo.data + 'T00:00:00'), "dd/MM/yyyy", { locale: ptBR });
+    const [ano, mes, dia] = custo.data.split('-');
+    const dataFormatada = `${dia}/${mes}/${ano}`;
     
     return [
       dataFormatada,

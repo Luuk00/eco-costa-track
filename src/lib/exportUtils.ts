@@ -25,8 +25,27 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const totalLiquido = totalEntradas - totalSaidas;
 
   const rows = custos.map((custo) => {
-    const [ano, mes, dia] = custo.data.split('-');
-    const dataFormatada = `${dia}/${mes}/${ano}`;
+        let dataFormatada = "-";
+    if (custo.data) {
+      try {
+        const dataObj = new Date(custo.data);
+        if (!isNaN(dataObj.getTime())) {
+          dataFormatada = dataObj.toLocaleDateString("pt-BR");
+        } else {
+          // se não for um formato padrão ISO
+          const partes = custo.data.split(/[-/]/);
+          if (partes.length === 3) {
+            if (partes[0].length === 4) {
+              dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            } else {
+              dataFormatada = `${partes[0]}/${partes[1]}/${partes[2]}`;
+            }
+          }
+        }
+      } catch {
+        dataFormatada = custo.data;
+      }
+    }
     
     return [
       dataFormatada,

@@ -32,12 +32,29 @@ export default function ImportarCSV() {
       const dataOriginal = columns[3]?.trim() || "";
       let dataFormatada = "";
       
-      if (dataOriginal && dataOriginal.includes("/")) {
-        const [dia, mes, ano] = dataOriginal.split("/");
-        dataFormatada = `${ano}-${mes.padStart(2, "0")}-${dia.padStart(2, "0")}`;
-      } else {
-        dataFormatada = dataOriginal; // mantém se já vier em ISO
+      if (dataOriginal.includes("/")) {
+        const partes = dataOriginal.split("/");
+        if (partes.length === 3) {
+          const [dia, mes, ano] = partes.map(p => p.padStart(2, "0"));
+          // Validação de data antes de salvar
+          const dataValida = new Date(`${ano}-${mes}-${dia}T00:00:00`);
+          if (!isNaN(dataValida.getTime())) {
+            // Sempre salvar em formato ISO (YYYY-MM-DD)
+            dataFormatada = `${ano}-${mes}-${dia}`;
+          } else {
+            console.warn("Data inválida detectada:", dataOriginal);
+            dataFormatada = "";
+          }
+        }
+      } else if (dataOriginal.includes("-")) {
+        // Caso já venha no formato ISO
+        const partes = dataOriginal.split("-");
+        if (partes.length === 3) {
+          const [ano, mes, dia] = partes;
+          dataFormatada = `${ano}-${mes}-${dia}`;
+        }
       }
+
       
       return {
         data: dataFormatada,

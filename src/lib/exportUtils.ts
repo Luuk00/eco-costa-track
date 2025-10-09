@@ -1,6 +1,5 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { isoToPtBr } from "@/lib/dateUtils";
 
 export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const headers = [
@@ -26,14 +25,6 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
   const totalLiquido = totalEntradas - totalSaidas;
 
   const rows = custos.map((custo) => {
-    const dataFormatada = isoToPtBr(String(custo.data));
-    return [
-      dataFormatada,
-      custo.descricao || "",
-      custo.valor?.toFixed(2) || "0.00",
-      custo.tipo_operacao || "",
-    ];
-  });
         let dataFormatada = "-";
     if (custo.data) {
       try {
@@ -48,7 +39,7 @@ export const exportToCSV = (custos: any[], filename: string = "custos") => {
               dataFormatada = custo.data;
             } else {
               try {
-                const dataFormatada = isoToPtBr(String(custo.data));
+                const dataObj = new Date(custo.data);
                 dataFormatada = dataObj.toLocaleDateString("pt-BR");
               } catch {
                 dataFormatada = custo.data;

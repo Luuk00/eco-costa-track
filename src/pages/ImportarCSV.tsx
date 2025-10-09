@@ -28,18 +28,33 @@ export default function ImportarCSV() {
       // Remover números iniciais se começar com dígitos
       nome = nome.replace(/^\d+[\s\/\-:]*/g, "").trim();
       
-      // Converter data de DD/MM/AAAA para AAAA-MM-DD
-      const dataOriginal = columns[3] || "";
-      let dataFormatada = dataOriginal;
-      if (dataOriginal && dataOriginal.includes("/")) {
+      // Converter data de DD/MM/AAAA para formato ISO (YYYY-MM-DD)
+      const dataOriginal = columns[3]?.trim() || "";
+      let dataFormatada = "";
+      
+      if (dataOriginal.includes("/")) {
         const partes = dataOriginal.split("/");
         if (partes.length === 3) {
-          const dia = partes[0].padStart(2, "0");
-          const mes = partes[1].padStart(2, "0");
-          const ano = partes[2];
+          const [dia, mes, ano] = partes.map(p => p.padStart(2, "0"));
+          // Validação de data antes de salvar
+          const dataValida = new Date(`${ano}-${mes}-${dia}T00:00:00`);
+          if (!isNaN(dataValida.getTime())) {
+            // Sempre salvar em formato ISO (YYYY-MM-DD)
+            dataFormatada = `${ano}-${mes}-${dia}`;
+          } else {
+            console.warn("Data inválida detectada:", dataOriginal);
+            dataFormatada = "";
+          }
+        }
+      } else if (dataOriginal.includes("-")) {
+        // Caso já venha no formato ISO
+        const partes = dataOriginal.split("-");
+        if (partes.length === 3) {
+          const [ano, mes, dia] = partes;
           dataFormatada = `${ano}-${mes}-${dia}`;
         }
       }
+
       
       return {
         data: dataFormatada,

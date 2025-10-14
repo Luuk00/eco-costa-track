@@ -18,6 +18,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -25,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Pencil } from "lucide-react";
+import { Pencil, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 
@@ -33,6 +35,7 @@ export default function Usuarios() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const { setValue, watch, handleSubmit } = useForm();
 
   const { data: usuarios, isLoading } = useQuery({
@@ -66,11 +69,15 @@ export default function Usuarios() {
 
   const mutation = useMutation({
     mutationFn: async (data: any) => {
-      const { empresa_id, role } = data;
+      const { nome, empresa_id, role } = data;
+      
+      if (!nome || nome.trim().length < 3) {
+        throw new Error("Nome deve ter pelo menos 3 caracteres");
+      }
       
       await supabase
         .from("profiles")
-        .update({ empresa_id })
+        .update({ nome: nome.trim(), empresa_id })
         .eq("id", selectedUser.id);
 
       await supabase
@@ -90,17 +97,40 @@ export default function Usuarios() {
       setDialogOpen(false);
       setSelectedUser(null);
     },
-    onError: () => {
-      toast.error("Erro ao atualizar usuário");
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao atualizar usuário");
     },
   });
 
   const handleEdit = (user: any) => {
     setSelectedUser(user);
+    setValue("nome", user.nome || "");
     setValue("empresa_id", user.empresa_id || "");
     setValue("role", (user.user_roles as any)?.[0]?.role || "");
     setDialogOpen(true);
   };
+
+  const getRoleBadge = (role: string) => {
+    switch (role) {
+      case "admin":
+        return <Badge variant="destructive">Administrador</Badge>;
+      case "financeiro":
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Financeiro</Badge>;
+      case "colaborador":
+        return <Badge variant="secondary">Colaborador</Badge>;
+      default:
+        return <Badge variant="outline">Sem função</Badge>;
+    }
+  };
+
+  const filteredUsuarios = usuarios?.filter((user) => {
+    if (!searchTerm) return true;
+    const search = searchTerm.toLowerCase();
+    return (
+      user.nome?.toLowerCase().includes(search) ||
+      user.email?.toLowerCase().includes(search)
+    );
+  });
 
   const onSubmit = (data: any) => {
     mutation.mutate(data);
@@ -122,6 +152,17 @@ export default function Usuarios() {
           <CardTitle>Lista de Usuários</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome ou email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -133,28 +174,33 @@ export default function Usuarios() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {usuarios?.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.nome || "-"}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.empresas?.nome || "-"}</TableCell>
-                  <TableCell>
-                    {(user.user_roles as any)?.[0]?.role === "admin" && "Administrador"}
-                    {(user.user_roles as any)?.[0]?.role === "financeiro" && "Financeiro"}
-                    {(user.user_roles as any)?.[0]?.role === "colaborador" && "Colaborador"}
-                    {!(user.user_roles as any)?.[0]?.role && "-"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(user)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+              {filteredUsuarios?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    Nenhum usuário encontrado
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredUsuarios?.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.nome || "-"}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.empresas?.nome || "-"}</TableCell>
+                    <TableCell>
+                      {getRoleBadge((user.user_roles as any)?.[0]?.role)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(user)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -169,6 +215,19 @@ export default function Usuarios() {
             <div>
               <Label>Email</Label>
               <div className="text-sm text-muted-foreground">{selectedUser?.email}</div>
+            </div>
+
+            <div>
+              <Label htmlFor="nome">Nome *</Label>
+              <Input
+                id="nome"
+                value={watch("nome") || ""}
+                onChange={(e) => setValue("nome", e.target.value)}
+                placeholder="Nome completo"
+                required
+                minLength={3}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Mínimo 3 caracteres</p>
             </div>
 
             <div>

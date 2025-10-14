@@ -16,54 +16,86 @@ export type Database = {
     Tables: {
       custos: {
         Row: {
+          aprovado_em: string | null
+          aprovado_por: string | null
           codigo_operacao: string | null
+          comprovante_url: string | null
           created_at: string
           data: string
           descricao: string | null
           documento: string | null
+          empresa_id: string | null
+          fornecedor_id: string | null
           gasto_id: string | null
           id: string
           obra_id: string
           observacao: string | null
           receptor_destinatario: string | null
+          status_aprovacao: string | null
           tipo_operacao: string | null
           tipo_transacao: string | null
           updated_at: string
           valor: number
         }
         Insert: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
           codigo_operacao?: string | null
+          comprovante_url?: string | null
           created_at?: string
           data: string
           descricao?: string | null
           documento?: string | null
+          empresa_id?: string | null
+          fornecedor_id?: string | null
           gasto_id?: string | null
           id?: string
           obra_id: string
           observacao?: string | null
           receptor_destinatario?: string | null
+          status_aprovacao?: string | null
           tipo_operacao?: string | null
           tipo_transacao?: string | null
           updated_at?: string
           valor: number
         }
         Update: {
+          aprovado_em?: string | null
+          aprovado_por?: string | null
           codigo_operacao?: string | null
+          comprovante_url?: string | null
           created_at?: string
           data?: string
           descricao?: string | null
           documento?: string | null
+          empresa_id?: string | null
+          fornecedor_id?: string | null
           gasto_id?: string | null
           id?: string
           obra_id?: string
           observacao?: string | null
           receptor_destinatario?: string | null
+          status_aprovacao?: string | null
           tipo_operacao?: string | null
           tipo_transacao?: string | null
           updated_at?: string
           valor?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "custos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custos_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "custos_gasto_id_fkey"
             columns: ["gasto_id"]
@@ -80,12 +112,81 @@ export type Database = {
           },
         ]
       }
+      empresas: {
+        Row: {
+          cnpj: string | null
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          cnpj?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          cnpj?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fornecedores: {
+        Row: {
+          cnpj_cpf: string | null
+          contato: string | null
+          created_at: string
+          email: string | null
+          empresa_id: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          cnpj_cpf?: string | null
+          contato?: string | null
+          created_at?: string
+          email?: string | null
+          empresa_id?: string | null
+          id?: string
+          nome: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cnpj_cpf?: string | null
+          contato?: string | null
+          created_at?: string
+          email?: string | null
+          empresa_id?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fornecedores_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gastos: {
         Row: {
           cliente: string
           created_at: string
           data_fim: string | null
           data_inicio: string
+          empresa_id: string | null
           id: string
           nome: string
           status: string
@@ -96,6 +197,7 @@ export type Database = {
           created_at?: string
           data_fim?: string | null
           data_inicio: string
+          empresa_id?: string | null
           id?: string
           nome: string
           status?: string
@@ -106,37 +208,113 @@ export type Database = {
           created_at?: string
           data_fim?: string | null
           data_inicio?: string
+          empresa_id?: string | null
           id?: string
           nome?: string
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "gastos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       obras: {
         Row: {
           created_at: string
+          empresa_id: string | null
           id: string
           nome: string
           observacao: string
+          orcamento_total: number | null
           status: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          empresa_id?: string | null
           id?: string
           nome: string
           observacao: string
+          orcamento_total?: number | null
           status?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          empresa_id?: string | null
           id?: string
           nome?: string
           observacao?: string
+          orcamento_total?: number | null
           status?: string
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obras_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          empresa_id: string | null
+          id: string
+          nome: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          empresa_id?: string | null
+          id: string
+          nome?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          empresa_id?: string | null
+          id?: string
+          nome?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -145,10 +323,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "financeiro" | "colaborador"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -275,6 +459,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "financeiro", "colaborador"],
+    },
   },
 } as const

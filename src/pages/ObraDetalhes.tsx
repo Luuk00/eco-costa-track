@@ -3,9 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Wallet, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -56,6 +58,11 @@ export default function ObraDetalhes() {
   const totalCustos = custos?.reduce((sum, c) => sum + c.valor, 0) || 0;
   const totalEntradas = custos?.filter(c => c.valor > 0).reduce((sum, c) => sum + c.valor, 0) || 0;
   const totalSaidas = custos?.filter(c => c.valor < 0).reduce((sum, c) => sum + c.valor, 0) || 0;
+  
+  const orcamentoTotal = obra?.orcamento_total || 0;
+  const totalGasto = Math.abs(totalSaidas);
+  const percentualGasto = orcamentoTotal > 0 ? (totalGasto / orcamentoTotal) * 100 : 0;
+  const orcamentoUltrapassado = percentualGasto > 100;
 
   return (
     <div className="space-y-6">
@@ -69,6 +76,66 @@ export default function ObraDetalhes() {
           <p className="text-muted-foreground">{obra.observacao || "-"}</p>
         </div>
       </div>
+
+      {orcamentoUltrapassado && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Orçamento Ultrapassado!</AlertTitle>
+          <AlertDescription>
+            Esta central de custos ultrapassou o orçamento previsto em {(percentualGasto - 100).toFixed(1)}%.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {orcamentoTotal > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Controle de Orçamento</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Orçamento Total</p>
+                <p className="text-xl font-bold text-foreground">
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(orcamentoTotal)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Gasto</p>
+                <p className="text-xl font-bold text-foreground">
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(totalGasto)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Percentual Consumido</p>
+                <p className={`text-xl font-bold ${
+                  percentualGasto > 100 ? 'text-red-600' : 
+                  percentualGasto > 80 ? 'text-yellow-600' : 
+                  'text-green-600'
+                }`}>
+                  {percentualGasto.toFixed(1)}%
+                </p>
+              </div>
+            </div>
+            <div>
+              <Progress 
+                value={Math.min(percentualGasto, 100)} 
+                className={
+                  percentualGasto > 100 ? 'bg-red-100 [&>div]:bg-red-600' : 
+                  percentualGasto > 80 ? 'bg-yellow-100 [&>div]:bg-yellow-600' : 
+                  'bg-green-100 [&>div]:bg-green-600'
+                }
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>

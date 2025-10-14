@@ -1,9 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, DollarSign, CheckCircle2, AlertCircle } from "lucide-react";
+import { Building2, TrendingUp, TrendingDown, CheckCircle2, Clock, Wallet } from "lucide-react";
+import { AlertasDashboard } from "@/components/AlertasDashboard";
+import { DespesasPorMesChart } from "@/components/charts/DespesasPorMesChart";
+import { CustosPorCategoriaChart } from "@/components/charts/CustosPorCategoriaChart";
+import { LucroLiquidoPorObraChart } from "@/components/charts/LucroLiquidoPorObraChart";
+import { TotalGastoPorFornecedorChart } from "@/components/charts/TotalGastoPorFornecedorChart";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Dashboard() {
+  const { empresaAtiva } = useAuth();
+  
   const { data: obras } = useQuery({
     queryKey: ["obras"],
     queryFn: async () => {
@@ -63,25 +71,16 @@ export default function Dashboard() {
         <p className="text-muted-foreground">Visão geral do sistema de gestão de centrais de custos</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Centrais</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{totalObras}</div>
-            <p className="text-xs text-muted-foreground mt-1">Centrais cadastradas</p>
-          </CardContent>
-        </Card>
+      <AlertasDashboard />
 
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Em Andamento</CardTitle>
-            <AlertCircle className="h-4 w-4 text-warning" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-warning">{obrasEmAndamento}</div>
+            <div className="text-2xl font-bold text-foreground">{obrasEmAndamento}</div>
             <p className="text-xs text-muted-foreground mt-1">Centrais ativas</p>
           </CardContent>
         </Card>
@@ -89,18 +88,29 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Concluídas</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">{obrasConcluidas}</div>
+            <div className="text-2xl font-bold text-foreground">{obrasConcluidas}</div>
             <p className="text-xs text-muted-foreground mt-1">Centrais finalizadas</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total de Centrais</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">{totalObras}</div>
+            <p className="text-xs text-muted-foreground mt-1">Centrais cadastradas</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Entradas</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-600" />
+            <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
@@ -116,7 +126,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Saídas</CardTitle>
-            <DollarSign className="h-4 w-4 text-red-600" />
+            <TrendingDown className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
@@ -132,7 +142,7 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Líquido</CardTitle>
-            <DollarSign className="h-4 w-4 text-secondary" />
+            <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${totalLiquido >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -146,7 +156,14 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <DespesasPorMesChart empresaId={empresaAtiva} />
+        <CustosPorCategoriaChart empresaId={empresaAtiva} />
+        <LucroLiquidoPorObraChart empresaId={empresaAtiva} />
+        <TotalGastoPorFornecedorChart empresaId={empresaAtiva} />
+      </div>
+
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Centrais Recentes</CardTitle>

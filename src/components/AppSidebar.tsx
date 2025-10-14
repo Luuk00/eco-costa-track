@@ -125,7 +125,7 @@ export function AppSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <NavLink
-                        to="/admin"
+                        to="/admin-geral"
                         className={({ isActive }) =>
                           isActive
                             ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"

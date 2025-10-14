@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
-      console.log("🔄 Buscando perfil do usuário:", userId);
+      console.log("🔄 fetchProfile - iniciando busca para userId:", userId);
       
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (profileError) throw profileError;
+      console.log("✅ fetchProfile - profile encontrado:", profileData);
       setProfile(profileData);
 
       if (profileData.empresa_id) {
@@ -57,19 +58,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("user_id", userId)
         .single();
 
-      console.log("✅ Role carregada do banco:", roleData?.role);
-      
+      console.log("✅ fetchProfile - role encontrada:", roleData?.role);
       if (roleData) {
         setRole(roleData.role);
       }
     } catch (error) {
-      console.error("Error fetching profile:", error);
+      console.error("❌ Error fetching profile:", error);
     }
   };
 
   const refetchProfile = async () => {
     if (user?.id) {
-      console.log("🔄 Recarregando perfil e permissões...");
+      console.log("🔄 refetchProfile - forçando atualização de perfil");
       await fetchProfile(user.id);
     }
   };
@@ -106,31 +106,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Listener para mudanças na tabela user_roles
+  // Listener para mudanças em user_roles (atualização automática de permissões)
   useEffect(() => {
     if (!user?.id) return;
 
+    console.log("👂 Iniciando listener para mudanças em user_roles");
+    
     const subscription = supabase
       .channel('user_roles_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
           table: 'user_roles',
-          filter: `user_id=eq.${user.id}`,
+          filter: `user_id=eq.${user.id}`
         },
-        () => {
-          console.log("🔔 Mudança detectada em user_roles, recarregando perfil...");
+        (payload) => {
+          console.log("🔔 Mudança detectada em user_roles:", payload);
           setTimeout(() => {
             fetchProfile(user.id);
           }, 0);
         }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
+      
+    return () => { 
+      console.log("👋 Removendo listener de user_roles");
+      subscription.unsubscribe(); 
     };
   }, [user?.id]);
 

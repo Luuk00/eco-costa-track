@@ -10,13 +10,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { empresaAtiva } = useAuth();
 
   const { data: empresa } = useQuery({
-    queryKey: ['empresa-nome', empresaAtiva],
+    queryKey: ["empresa", empresaAtiva],
     queryFn: async () => {
       if (!empresaAtiva) return null;
       const { data } = await supabase
-        .from('empresas')
-        .select('nome, nome_personalizado')
-        .eq('id', empresaAtiva)
+        .from("empresas")
+        .select("nome, nome_personalizado")
+        .eq("id", empresaAtiva)
         .single();
       return data;
     },

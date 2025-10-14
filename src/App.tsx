@@ -25,6 +25,7 @@ import SubscriptionExpired from "./pages/SubscriptionExpired";
 import NotFound from "./pages/NotFound";
 import AdminGeral from "./pages/AdminGeral";
 
+
 const queryClient = new QueryClient();
 
 const App = () => (

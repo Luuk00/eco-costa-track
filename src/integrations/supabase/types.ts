@@ -118,6 +118,7 @@ export type Database = {
           created_at: string
           id: string
           nome: string
+          nome_personalizado: string | null
           updated_at: string
         }
         Insert: {
@@ -125,6 +126,7 @@ export type Database = {
           created_at?: string
           id?: string
           nome: string
+          nome_personalizado?: string | null
           updated_at?: string
         }
         Update: {
@@ -132,6 +134,7 @@ export type Database = {
           created_at?: string
           id?: string
           nome?: string
+          nome_personalizado?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -299,6 +302,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscriptions: {
+        Row: {
+          amount_paid: number | null
+          cancelled_at: string | null
+          created_at: string | null
+          currency: string | null
+          empresa_id: string
+          id: string
+          plan_type: string
+          started_at: string | null
+          status: string
+          subscription_ends_at: string | null
+          trial_ends_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          empresa_id: string
+          id?: string
+          plan_type?: string
+          started_at?: string | null
+          status?: string
+          subscription_ends_at?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          cancelled_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          empresa_id?: string
+          id?: string
+          plan_type?: string
+          started_at?: string | null
+          status?: string
+          subscription_ends_at?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          created_at: string | null
+          id: string
+          language: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          language?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          language?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

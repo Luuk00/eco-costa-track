@@ -14,22 +14,10 @@ export function usePermission() {
   };
 
   const isAdmin = () => hasRole("admin");
-  const isFinanceiro = () => hasRole(["admin", "financeiro"]);
-  const canManageEmpresas = () => isAdmin();
-  const canManageUsuarios = () => isAdmin();
-  const canManageFornecedores = () => isFinanceiro();
-  const canApprove = () => isFinanceiro();
-  const canImport = () => isFinanceiro();
 
   return {
     hasRole,
     isAdmin,
-    isFinanceiro,
-    canManageEmpresas,
-    canManageUsuarios,
-    canManageFornecedores,
-    canApprove,
-    canImport,
     role,
   };
 }

@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import { SubscriptionProvider } from "./contexts/SubscriptionContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import Auth from "./pages/Auth";
@@ -18,6 +20,8 @@ import Empresas from "./pages/Empresas";
 import Usuarios from "./pages/Usuarios";
 import Fornecedores from "./pages/Fornecedores";
 import Aprovacoes from "./pages/Aprovacoes";
+import Configuracoes from "./pages/Configuracoes";
+import SubscriptionExpired from "./pages/SubscriptionExpired";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,8 +33,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
+          <LanguageProvider>
+            <SubscriptionProvider>
+              <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/subscription-expired" element={<SubscriptionExpired />} />
             <Route
               path="/"
               element={
@@ -94,9 +101,19 @@ const App = () => (
             <Route
               path="/importar"
               element={
-                <ProtectedRoute requireRole={["admin", "financeiro"]}>
+                <ProtectedRoute>
                   <Layout>
                     <ImportarCSV />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/configuracoes"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Configuracoes />
                   </Layout>
                 </ProtectedRoute>
               }
@@ -124,7 +141,7 @@ const App = () => (
             <Route
               path="/fornecedores"
               element={
-                <ProtectedRoute requireRole={["admin", "financeiro"]}>
+                <ProtectedRoute>
                   <Layout>
                     <Fornecedores />
                   </Layout>
@@ -134,7 +151,7 @@ const App = () => (
             <Route
               path="/aprovacoes"
               element={
-                <ProtectedRoute requireRole={["admin", "financeiro"]}>
+                <ProtectedRoute>
                   <Layout>
                     <Aprovacoes />
                   </Layout>
@@ -142,7 +159,9 @@ const App = () => (
               }
             />
             <Route path="*" element={<NotFound />} />
-          </Routes>
+              </Routes>
+            </SubscriptionProvider>
+          </LanguageProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

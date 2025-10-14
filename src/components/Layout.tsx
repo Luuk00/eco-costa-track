@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { UserMenu } from "@/components/UserMenu";
-import { EmpresaSelector } from "@/components/EmpresaSelector";
+import { TrialBanner } from "@/components/TrialBanner";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,14 +12,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 sticky top-0 z-10">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
-              <h1 className="text-lg font-semibold text-foreground">Sistema de Gestão de Obras</h1>
+              <h1 className="text-lg font-semibold text-foreground">FINANTRACKER</h1>
             </div>
             <div className="flex items-center gap-4">
-              <EmpresaSelector />
               <UserMenu />
             </div>
           </header>
           <main className="flex-1 p-6 bg-muted/30">
+            <TrialBanner />
             {children}
           </main>
         </div>

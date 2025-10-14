@@ -1,32 +1,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, AlertTriangle } from "lucide-react";
+import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { ImportPreview } from "@/components/importar/ImportPreview";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePermission } from "@/hooks/usePermission";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function ImportarCSV() {
   const [lancamentos, setLancamentos] = useState<any[]>([]);
   const [fileName, setFileName] = useState("");
   const { empresaAtiva } = useAuth();
-  const { canImport } = usePermission();
-
-  if (!canImport()) {
-    return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Acesso Negado</AlertTitle>
-          <AlertDescription>
-            Você não tem permissão para importar dados. Apenas administradores e financeiros podem realizar esta ação.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   const processCSV = (text: string) => {
     const lines = text.split("\n").filter((line) => line.trim());

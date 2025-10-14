@@ -123,7 +123,7 @@ export const exportToPDF = (custos: any[], filename: string = "custos") => {
       </style>
     </head>
     <body>
-      <h1>Relatório de Custos - MAP AMBIENTAL</h1>
+      <h1>Relatório de Custos - FINANTRACKER</h1>
       <p>Data de geração: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
       <table>
         <thead>

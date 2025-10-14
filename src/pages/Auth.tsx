@@ -106,8 +106,8 @@ export default function Auth() {
               <Building2 className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl">MAP AMBIENTAL</CardTitle>
-          <CardDescription>Sistema de Gestão de Obras</CardDescription>
+          <CardTitle className="text-2xl">FINANTRACKER</CardTitle>
+          <CardDescription>Gestão Financeira Inteligente</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">

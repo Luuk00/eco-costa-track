@@ -20,6 +20,7 @@ interface AuthContextType {
   setEmpresaAtiva: (id: string) => void;
   loading: boolean;
   signOut: () => Promise<void>;
+  refetchProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,6 +36,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log("🔄 Buscando perfil do usuário:", userId);
+      
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -54,11 +57,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("user_id", userId)
         .single();
 
+      console.log("✅ Role carregada do banco:", roleData?.role);
+      
       if (roleData) {
         setRole(roleData.role);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
+    }
+  };
+
+  const refetchProfile = async () => {
+    if (user?.id) {
+      console.log("🔄 Recarregando perfil e permissões...");
+      await fetchProfile(user.id);
     }
   };
 
@@ -94,6 +106,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Listener para mudanças na tabela user_roles
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const subscription = supabase
+      .channel('user_roles_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_roles',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          console.log("🔔 Mudança detectada em user_roles, recarregando perfil...");
+          setTimeout(() => {
+            fetchProfile(user.id);
+          }, 0);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [user?.id]);
+
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -116,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setEmpresaAtiva,
         loading,
         signOut,
+        refetchProfile,
       }}
     >
       {children}

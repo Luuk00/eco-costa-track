@@ -9,10 +9,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, RefreshCw, User as UserIcon } from "lucide-react";
+import { toast } from "sonner";
 
 export function UserMenu() {
-  const { profile, role, signOut } = useAuth();
+  const { profile, role, signOut, refetchProfile } = useAuth();
+
+  const handleRefetchPermissions = async () => {
+    await refetchProfile();
+    toast.success("Permissões recarregadas!");
+  };
 
   const getInitials = (nome: string | null) => {
     if (!nome) return "U";
@@ -53,6 +59,10 @@ export function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleRefetchPermissions}>
+          <RefreshCw className="mr-2 h-4 w-4" />
+          <span>Recarregar Permissões</span>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={signOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Sair</span>

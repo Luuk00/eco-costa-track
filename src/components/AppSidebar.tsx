@@ -1,6 +1,9 @@
 import { Building2, DollarSign, Upload, LayoutDashboard, Wallet, Users, Building, UserCog, CheckSquare, Settings, ShieldCheck } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { usePermission } from "@/hooks/usePermission";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
@@ -34,13 +37,30 @@ const financeiroMenuItems = [
 
 export function AppSidebar() {
   const { hasRole, isSuperAdmin } = usePermission();
+  const { empresaAtiva } = useAuth();
+
+  const { data: empresa } = useQuery({
+    queryKey: ['empresa-nome', empresaAtiva],
+    queryFn: async () => {
+      if (!empresaAtiva) return null;
+      const { data } = await supabase
+        .from('empresas')
+        .select('nome, nome_personalizado')
+        .eq('id', empresaAtiva)
+        .single();
+      return data;
+    },
+    enabled: !!empresaAtiva,
+  });
+
+  const nomeEmpresa = empresa?.nome_personalizado || empresa?.nome || "FINANTRACKER";
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-2">
           <Building2 className="h-6 w-6 text-sidebar-foreground" />
-          <span className="font-bold text-lg text-sidebar-foreground">FINANTRACKER</span>
+          <span className="font-bold text-lg text-sidebar-foreground">{nomeEmpresa}</span>
         </div>
       </SidebarHeader>
       

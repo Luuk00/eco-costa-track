@@ -13,11 +13,15 @@ export function usePermission() {
     return role === requiredRole;
   };
 
-  const isAdmin = () => hasRole("admin");
+  const isSuperAdmin = () => hasRole("super_admin");
+  const isAdmin = () => hasRole(["admin", "super_admin"]);
+  const isFinanceiro = () => hasRole(["financeiro", "admin", "super_admin"]);
 
   return {
     hasRole,
+    isSuperAdmin,
     isAdmin,
+    isFinanceiro,
     role,
   };
 }

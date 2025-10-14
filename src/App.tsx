@@ -23,6 +23,7 @@ import Aprovacoes from "./pages/Aprovacoes";
 import Configuracoes from "./pages/Configuracoes";
 import SubscriptionExpired from "./pages/SubscriptionExpired";
 import NotFound from "./pages/NotFound";
+import AdminGeral from "./pages/AdminGeral";
 
 const queryClient = new QueryClient();
 
@@ -118,16 +119,26 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/empresas"
-              element={
-                <ProtectedRoute requireRole="admin">
-                  <Layout>
-                    <Empresas />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+          <Route
+            path="/empresas"
+            element={
+              <ProtectedRoute requireRole="admin">
+                <Layout>
+                  <Empresas />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireRole="super_admin">
+                <Layout>
+                  <AdminGeral />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
             <Route
               path="/usuarios"
               element={

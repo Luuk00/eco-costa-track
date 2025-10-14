@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -11,17 +10,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,8 +29,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
 
-export default function Empresas() {
+export function AdminEmpresasTab() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -41,7 +41,7 @@ export default function Empresas() {
   const { register, handleSubmit, reset } = useForm();
 
   const { data: empresas, isLoading } = useQuery({
-    queryKey: ["empresas"],
+    queryKey: ["admin-empresas"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("empresas")
@@ -66,7 +66,7 @@ export default function Empresas() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["empresas"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-empresas"] });
       toast.success(selectedEmpresa ? "Empresa atualizada!" : "Empresa criada!");
       setDialogOpen(false);
       reset();
@@ -83,7 +83,7 @@ export default function Empresas() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["empresas"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-empresas"] });
       toast.success("Empresa excluída!");
       setDeleteDialogOpen(false);
       setSelectedEmpresa(null);
@@ -101,7 +101,7 @@ export default function Empresas() {
 
   const handleNew = () => {
     setSelectedEmpresa(null);
-    reset({ nome: "", cnpj: "" });
+    reset({ nome: "", cnpj: "", nome_personalizado: "" });
     setDialogOpen(true);
   };
 
@@ -114,27 +114,21 @@ export default function Empresas() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Empresas</h1>
-          <p className="text-muted-foreground">Gerencie as empresas do sistema</p>
-        </div>
-        <Button onClick={handleNew}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Empresa
-        </Button>
-      </div>
-
+    <>
       <Card>
-        <CardHeader>
-          <CardTitle>Lista de Empresas</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Todas as Empresas</CardTitle>
+          <Button onClick={handleNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Empresa
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
+                <TableHead>Nome Personalizado</TableHead>
                 <TableHead>CNPJ</TableHead>
                 <TableHead>Criado em</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -144,6 +138,7 @@ export default function Empresas() {
               {empresas?.map((empresa) => (
                 <TableRow key={empresa.id}>
                   <TableCell className="font-medium">{empresa.nome}</TableCell>
+                  <TableCell>{empresa.nome_personalizado || "-"}</TableCell>
                   <TableCell>{empresa.cnpj || "-"}</TableCell>
                   <TableCell>
                     {new Date(empresa.created_at).toLocaleDateString("pt-BR")}
@@ -195,9 +190,6 @@ export default function Empresas() {
                 {...register("nome_personalizado")} 
                 placeholder="Nome exibido nos relatórios" 
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Nome que aparecerá nos PDFs e relatórios
-              </p>
             </div>
             <div>
               <Label htmlFor="cnpj">CNPJ</Label>
@@ -235,6 +227,6 @@ export default function Empresas() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

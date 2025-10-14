@@ -1,4 +1,4 @@
-import { Building2, DollarSign, Upload, LayoutDashboard, Wallet, Users, Building, UserCog, CheckSquare, Settings } from "lucide-react";
+import { Building2, DollarSign, Upload, LayoutDashboard, Wallet, Users, Building, UserCog, CheckSquare, Settings, ShieldCheck } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { usePermission } from "@/hooks/usePermission";
 import {
@@ -33,7 +33,7 @@ const financeiroMenuItems = [
 ];
 
 export function AppSidebar() {
-  const { hasRole } = usePermission();
+  const { hasRole, isSuperAdmin } = usePermission();
 
   return (
     <Sidebar>
@@ -101,6 +101,23 @@ export function AppSidebar() {
             <SidebarGroupLabel>Administração</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                {isSuperAdmin() && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <NavLink
+                        to="/admin"
+                        className={({ isActive }) =>
+                          isActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            : "hover:bg-sidebar-accent/50"
+                        }
+                      >
+                        <ShieldCheck className="h-4 w-4" />
+                        <span>Admin Geral</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
                 {adminMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>

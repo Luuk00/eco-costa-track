@@ -2,6 +2,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export function usePermission() {
   const { role } = useAuth();
+  
+  console.log("🔍 usePermission - role atual:", role);
 
   const hasRole = (requiredRole: string | string[]) => {
     if (!role) return false;
@@ -13,7 +15,11 @@ export function usePermission() {
     return role === requiredRole;
   };
 
-  const isSuperAdmin = () => hasRole("super_admin");
+  const isSuperAdmin = () => {
+    const result = hasRole("super_admin");
+    console.log("🔍 isSuperAdmin:", result);
+    return result;
+  };
   const isAdmin = () => hasRole(["admin", "super_admin"]);
   const isFinanceiro = () => hasRole(["financeiro", "admin", "super_admin"]);
 

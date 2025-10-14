@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ComprovanteUpload } from "./ComprovanteUpload";
 
 interface CustoDialogProps {
   open: boolean;
@@ -29,6 +31,8 @@ interface CustoDialogProps {
 
 export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
   const queryClient = useQueryClient();
+  const { empresaAtiva } = useAuth();
+  const [comprovanteUrl, setComprovanteUrl] = useState("");
   const { register, handleSubmit, reset, setValue, watch } = useForm({
     defaultValues: {
       obra_id: "",
@@ -42,6 +46,7 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
       codigo_operacao: "",
       receptor_destinatario: "",
       observacao: "",
+      fornecedor_id: "",
     },
   });
 
@@ -73,6 +78,17 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
     },
   });
 
+  const { data: fornecedores } = useQuery({
+    queryKey: ["fornecedores", empresaAtiva],
+    queryFn: async () => {
+      let query = supabase.from("fornecedores").select("*").order("nome");
+      if (empresaAtiva) query = query.eq("empresa_id", empresaAtiva);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (custo) {
       // Corrigir problema de data - usar formato local sem conversão de timezone
@@ -91,7 +107,9 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
         codigo_operacao: custo.codigo_operacao || "",
         receptor_destinatario: custo.receptor_destinatario || "",
         observacao: custo.observacao || "",
+        fornecedor_id: custo.fornecedor_id || "",
       });
+      setComprovanteUrl(custo.comprovante_url || "");
     } else {
       reset({
         obra_id: "",
@@ -105,7 +123,9 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
         codigo_operacao: "",
         receptor_destinatario: "",
         observacao: "",
+        fornecedor_id: "",
       });
+      setComprovanteUrl("");
     }
   }, [custo, reset]);
 
@@ -114,6 +134,8 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
       const payload = {
         ...data,
         valor: parseFloat(data.valor),
+        comprovante_url: comprovanteUrl || null,
+        empresa_id: empresaAtiva,
       };
 
       if (custo) {
@@ -246,6 +268,27 @@ export function CustoDialog({ open, onOpenChange, custo }: CustoDialogProps) {
               <Input id="receptor_destinatario" {...register("receptor_destinatario")} />
             </div>
           </div>
+
+          <div>
+            <Label htmlFor="fornecedor_id">Fornecedor</Label>
+            <Select value={watch("fornecedor_id")} onValueChange={(value) => setValue("fornecedor_id", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                {fornecedores?.map((fornecedor) => (
+                  <SelectItem key={fornecedor.id} value={fornecedor.id}>
+                    {fornecedor.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <ComprovanteUpload
+            onUploadComplete={setComprovanteUrl}
+            currentUrl={custo?.comprovante_url}
+          />
 
           <div>
             <Label htmlFor="observacao">Observação</Label>

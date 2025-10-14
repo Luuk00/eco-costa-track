@@ -33,6 +33,7 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
       nome: "",
       status: "em andamento",
       observacao: "",
+      orcamento_total: "",
     },
   });
 
@@ -44,12 +45,14 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
         nome: obra.nome,
         status: obra.status,
         observacao: obra.observacao || "",
+        orcamento_total: obra.orcamento_total || "",
       });
     } else {
       reset({
         nome: "",
         status: "em andamento",
         observacao: "",
+        orcamento_total: "",
       });
     }
   }, [obra, reset]);
@@ -83,6 +86,7 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
       nome: data.nome,
       status: data.status,
       observacao: data.observacao || null,
+      orcamento_total: data.orcamento_total ? parseFloat(data.orcamento_total) : null,
     };
     mutation.mutate(cleanData);
   };
@@ -102,6 +106,17 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
           <div>
             <Label htmlFor="observacao">Observação</Label>
             <Input id="observacao" {...register("observacao")} />
+          </div>
+
+          <div>
+            <Label htmlFor="orcamento_total">Orçamento Total (R$)</Label>
+            <Input
+              id="orcamento_total"
+              type="number"
+              step="0.01"
+              {...register("orcamento_total")}
+              placeholder="0.00"
+            />
           </div>
 
           <div>

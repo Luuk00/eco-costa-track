@@ -3,7 +3,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
+import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Obras from "./pages/Obras";
 import ObraDetalhes from "./pages/ObraDetalhes";
@@ -11,6 +14,10 @@ import Gastos from "./pages/Gastos";
 import GastoDetalhes from "./pages/GastoDetalhes";
 import Custos from "./pages/Custos";
 import ImportarCSV from "./pages/ImportarCSV";
+import Empresas from "./pages/Empresas";
+import Usuarios from "./pages/Usuarios";
+import Fornecedores from "./pages/Fornecedores";
+import Aprovacoes from "./pages/Aprovacoes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,18 +28,122 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
+        <AuthProvider>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/obras" element={<Obras />} />
-            <Route path="/obras/:id" element={<ObraDetalhes />} />
-            <Route path="/gastos" element={<Gastos />} />
-            <Route path="/gastos/:id" element={<GastoDetalhes />} />
-            <Route path="/custos" element={<Custos />} />
-            <Route path="/importar" element={<ImportarCSV />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/obras"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Obras />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/obras/:id"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ObraDetalhes />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gastos"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Gastos />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gastos/:id"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <GastoDetalhes />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/custos"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Custos />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/importar"
+              element={
+                <ProtectedRoute requireRole={["admin", "financeiro"]}>
+                  <Layout>
+                    <ImportarCSV />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/empresas"
+              element={
+                <ProtectedRoute requireRole="admin">
+                  <Layout>
+                    <Empresas />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/usuarios"
+              element={
+                <ProtectedRoute requireRole="admin">
+                  <Layout>
+                    <Usuarios />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/fornecedores"
+              element={
+                <ProtectedRoute requireRole={["admin", "financeiro"]}>
+                  <Layout>
+                    <Fornecedores />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/aprovacoes"
+              element={
+                <ProtectedRoute requireRole={["admin", "financeiro"]}>
+                  <Layout>
+                    <Aprovacoes />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Layout>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

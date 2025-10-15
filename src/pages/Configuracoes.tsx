@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { CreditCard, Globe, User, Building2 } from 'lucide-react';
+import { CreditCard, Globe, User, Building2, Lock } from 'lucide-react';
 
 export default function Configuracoes() {
   const { user, profile } = useAuth();
@@ -20,6 +20,8 @@ export default function Configuracoes() {
   const queryClient = useQueryClient();
   const [nome, setNome] = useState(profile?.nome || '');
   const [nomePersonalizado, setNomePersonalizado] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const { data: subscription } = useQuery({
     queryKey: ['subscription', user?.id],
@@ -87,6 +89,21 @@ export default function Configuracoes() {
     },
   });
 
+  const updatePasswordMutation = useMutation({
+    mutationFn: async (password: string) => {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Senha alterada com sucesso!');
+      setNewPassword('');
+      setConfirmPassword('');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Erro ao alterar senha');
+    },
+  });
+
   const handleSaveNome = () => {
     if (nome.trim().length < 3) {
       toast.error(t('settings.nameMinLength'));
@@ -97,6 +114,26 @@ export default function Configuracoes() {
 
   const handleSaveEmpresa = () => {
     updateEmpresaMutation.mutate(nomePersonalizado);
+  };
+
+  const handleChangePassword = () => {
+    if (newPassword.length < 6) {
+      toast.error('A senha deve ter no mínimo 6 caracteres');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('As senhas não coincidem');
+      return;
+    }
+    updatePasswordMutation.mutate(newPassword);
+  };
+
+  const getPasswordStrength = (password: string) => {
+    if (password.length === 0) return { label: '', color: '' };
+    if (password.length < 6) return { label: 'Muito fraca', color: 'text-red-500' };
+    if (password.length < 10) return { label: 'Fraca', color: 'text-orange-500' };
+    if (password.length < 14) return { label: 'Média', color: 'text-yellow-500' };
+    return { label: 'Forte', color: 'text-green-500' };
   };
 
   const getSubscriptionBadge = () => {
@@ -140,6 +177,10 @@ export default function Configuracoes() {
           <TabsTrigger value="plan">
             <CreditCard className="mr-2 h-4 w-4" />
             {t('settings.plan')}
+          </TabsTrigger>
+          <TabsTrigger value="security">
+            <Lock className="mr-2 h-4 w-4" />
+            Segurança
           </TabsTrigger>
           <TabsTrigger value="language">
             <Globe className="mr-2 h-4 w-4" />
@@ -270,6 +311,51 @@ export default function Configuracoes() {
                   </Card>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="security">
+          <Card>
+            <CardHeader>
+              <CardTitle>Segurança</CardTitle>
+              <CardDescription>Altere sua senha de acesso</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-password">Nova Senha</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Digite sua nova senha"
+                />
+                {newPassword && (
+                  <p className={`text-sm ${getPasswordStrength(newPassword).color}`}>
+                    Força da senha: {getPasswordStrength(newPassword).label}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Digite novamente sua nova senha"
+                />
+              </div>
+              <Button 
+                onClick={handleChangePassword} 
+                disabled={updatePasswordMutation.isPending || !newPassword || !confirmPassword}
+              >
+                {updatePasswordMutation.isPending ? 'Alterando...' : 'Alterar Senha'}
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                A senha deve ter no mínimo 6 caracteres.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>

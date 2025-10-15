@@ -2,40 +2,28 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Pencil, Search, Key, ChevronLeft, ChevronRight } from "lucide-react";
+
+const ITEMS_PER_PAGE = 20;
 
 export function AdminUsuariosTab() {
-  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [page, setPage] = useState(1);
+  const [confirmPlanChange, setConfirmPlanChange] = useState<{open: boolean, userId: string, planType: string, userName: string} | null>(null);
+  const [confirmPasswordReset, setConfirmPasswordReset] = useState<{open: boolean, userEmail: string, userName: string} | null>(null);
+  const queryClient = useQueryClient();
   const { setValue, watch, handleSubmit } = useForm();
 
   const { data: usuarios, isLoading } = useQuery({
@@ -70,22 +58,58 @@ export function AdminUsuariosTab() {
 
   const updatePlanMutation = useMutation({
     mutationFn: async ({ userId, planType }: { userId: string; planType: string }) => {
+      const now = new Date();
+      let updates: any = {
+        plan_type: planType,
+        updated_at: now.toISOString(),
+        started_at: now.toISOString(),
+        status: 'active'
+      };
+
+      if (planType === 'annual') {
+        updates.subscription_ends_at = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
+        updates.trial_ends_at = null;
+      } else if (planType === 'monthly') {
+        updates.subscription_ends_at = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        updates.trial_ends_at = null;
+      } else if (planType === 'trial') {
+        updates.trial_ends_at = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        updates.subscription_ends_at = null;
+      }
+
       const { error } = await supabase
         .from("subscriptions")
-        .update({ 
-          plan_type: planType,
-          updated_at: new Date().toISOString()
-        })
+        .update(updates)
         .eq("user_id", userId);
       
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-usuarios"] });
-      toast.success("Plano atualizado com sucesso!");
+      toast.success("Plano e data de expiração atualizados com sucesso!");
+      setConfirmPlanChange(null);
     },
     onError: (error: any) => {
       toast.error(error.message || "Erro ao atualizar plano");
+      setConfirmPlanChange(null);
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const redirectUrl = `${window.location.origin}/auth`;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Email de redefinição de senha enviado com sucesso!");
+      setConfirmPasswordReset(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao enviar email de redefinição");
+      setConfirmPasswordReset(null);
     },
   });
 
@@ -143,14 +167,13 @@ export function AdminUsuariosTab() {
     }
   };
 
-  const getPlanBadge = (subscription: any) => {
-    if (!subscription) return <Badge variant="outline">Sem plano</Badge>;
-    
-    const planLabel = subscription.plan_type === 'trial' ? '🎁 Trial' : 
-                     subscription.plan_type === 'monthly' ? '📅 Mensal' : 
-                     '📆 Anual';
-    
-    return <Badge>{planLabel}</Badge>;
+  const handlePlanChange = (userId: string, planType: string, userName: string) => {
+    const planNames = { trial: '🎁 Trial (7 dias)', monthly: '📅 Mensal (30 dias)', annual: '📆 Anual (365 dias)' };
+    setConfirmPlanChange({ open: true, userId, planType, userName: planNames[planType as keyof typeof planNames] });
+  };
+
+  const handlePasswordReset = (userEmail: string, userName: string) => {
+    setConfirmPasswordReset({ open: true, userEmail, userName });
   };
 
   const filteredUsuarios = usuarios?.filter((user) => {
@@ -160,7 +183,13 @@ export function AdminUsuariosTab() {
       user.nome?.toLowerCase().includes(search) ||
       user.email?.toLowerCase().includes(search)
     );
-  });
+  }) || [];
+
+  const totalPages = Math.ceil(filteredUsuarios.length / ITEMS_PER_PAGE);
+  const paginatedUsuarios = filteredUsuarios.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
 
   const onSubmit = (data: any) => {
     mutation.mutate(data);
@@ -200,7 +229,7 @@ export function AdminUsuariosTab() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsuarios?.map((user) => (
+              {paginatedUsuarios.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.nome || "-"}</TableCell>
                   <TableCell>{user.email}</TableCell>
@@ -211,10 +240,7 @@ export function AdminUsuariosTab() {
                   <TableCell>
                     <Select 
                       value={(user.subscriptions as any)?.[0]?.plan_type || "trial"}
-                      onValueChange={(value) => updatePlanMutation.mutate({ 
-                        userId: user.id, 
-                        planType: value 
-                      })}
+                      onValueChange={(value) => handlePlanChange(user.id, value, user.nome)}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
@@ -227,20 +253,96 @@ export function AdminUsuariosTab() {
                     </Select>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(user)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePasswordReset(user.email, user.nome)}
+                        title="Resetar senha"
+                      >
+                        <Key className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(user)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-4">
+              <p className="text-sm text-muted-foreground">
+                Página {page} de {totalPages} ({filteredUsuarios.length} usuários)
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Próximo
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={confirmPlanChange?.open || false} onOpenChange={(open) => !open && setConfirmPlanChange(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar mudança de plano</AlertDialogTitle>
+            <AlertDialogDescription>
+              Você tem certeza que deseja mudar o plano de <strong>{selectedUser?.nome}</strong> para <strong>{confirmPlanChange?.userName}</strong>?
+              <br /><br />
+              A data de expiração será automaticamente atualizada.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmPlanChange && updatePlanMutation.mutate({ userId: confirmPlanChange.userId, planType: confirmPlanChange.planType })}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmPasswordReset?.open || false} onOpenChange={(open) => !open && setConfirmPasswordReset(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resetar senha do usuário</AlertDialogTitle>
+            <AlertDialogDescription>
+              Enviar email de redefinição de senha para <strong>{confirmPasswordReset?.userName}</strong> ({confirmPasswordReset?.userEmail})?
+              <br /><br />
+              O usuário receberá um link para criar uma nova senha.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmPasswordReset && resetPasswordMutation.mutate(confirmPasswordReset.userEmail)}>
+              Enviar Email
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>

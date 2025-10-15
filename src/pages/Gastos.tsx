@@ -6,20 +6,28 @@ import { Plus } from "lucide-react";
 import { GastosTable } from "@/components/gastos/GastosTable";
 import { GastoDialog } from "@/components/gastos/GastoDialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermission } from "@/hooks/usePermission";
 
 export default function Gastos() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingGasto, setEditingGasto] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { empresaAtiva } = useAuth();
+  const { isSuperAdmin } = usePermission();
 
   const { data: gastos, isLoading } = useQuery({
-    queryKey: ["gastos"],
+    queryKey: ["gastos", empresaAtiva],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("gastos")
-        .select("*")
-        .order("created_at", { ascending: false });
+      let query = supabase.from("gastos").select("*");
+      
+      // Se não for super_admin, filtrar por empresa
+      if (empresaAtiva && !isSuperAdmin()) {
+        query = query.eq("empresa_id", empresaAtiva);
+      }
+      
+      const { data, error } = await query.order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;

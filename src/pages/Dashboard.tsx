@@ -8,40 +8,55 @@ import { CustosPorCategoriaChart } from "@/components/charts/CustosPorCategoriaC
 import { LucroLiquidoPorObraChart } from "@/components/charts/LucroLiquidoPorObraChart";
 import { TotalGastoPorFornecedorChart } from "@/components/charts/TotalGastoPorFornecedorChart";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermission } from "@/hooks/usePermission";
 
 export default function Dashboard() {
   const { empresaAtiva } = useAuth();
+  const { isSuperAdmin } = usePermission();
   
   const { data: obras } = useQuery({
-    queryKey: ["obras"],
+    queryKey: ["obras", empresaAtiva],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("obras")
-        .select("*")
-        .order("created_at", { ascending: false });
+      let query = supabase.from("obras").select("*");
+      
+      // Se não for super_admin, filtrar por empresa
+      if (empresaAtiva && !isSuperAdmin()) {
+        query = query.eq("empresa_id", empresaAtiva);
+      }
+      
+      const { data, error } = await query.order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
   });
 
   const { data: custos } = useQuery({
-    queryKey: ["custos"],
+    queryKey: ["custos", empresaAtiva],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("custos")
-        .select("*");
+      let query = supabase.from("custos").select("*");
+      
+      // Se não for super_admin, filtrar por empresa
+      if (empresaAtiva && !isSuperAdmin()) {
+        query = query.eq("empresa_id", empresaAtiva);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
   });
 
   const { data: gastos } = useQuery({
-    queryKey: ["gastos"],
+    queryKey: ["gastos", empresaAtiva],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("gastos")
-        .select("*")
-        .order("created_at", { ascending: false });
+      let query = supabase.from("gastos").select("*");
+      
+      // Se não for super_admin, filtrar por empresa
+      if (empresaAtiva && !isSuperAdmin()) {
+        query = query.eq("empresa_id", empresaAtiva);
+      }
+      
+      const { data, error } = await query.order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },

@@ -123,7 +123,7 @@ const App = () => (
           <Route
             path="/empresas"
             element={
-              <ProtectedRoute requireRole="admin">
+              <ProtectedRoute requireRole={["admin", "super_admin"]}>
                 <Layout>
                   <Empresas />
                 </Layout>
@@ -143,7 +143,7 @@ const App = () => (
             <Route
               path="/usuarios"
               element={
-                <ProtectedRoute requireRole="admin">
+                <ProtectedRoute requireRole={["admin", "super_admin"]}>
                   <Layout>
                     <Usuarios />
                   </Layout>

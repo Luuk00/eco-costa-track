@@ -7,20 +7,28 @@ import { ObraDialog } from "@/components/obras/ObraDialog";
 import { ObrasTable } from "@/components/obras/ObrasTable";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermission } from "@/hooks/usePermission";
 
 export default function Obras() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingObra, setEditingObra] = useState<any>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { empresaAtiva } = useAuth();
+  const { isSuperAdmin } = usePermission();
 
   const { data: obras, isLoading } = useQuery({
-    queryKey: ["obras"],
+    queryKey: ["obras", empresaAtiva],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("obras")
-        .select("*")
-        .order("created_at", { ascending: false });
+      let query = supabase.from("obras").select("*");
+      
+      // Se não for super_admin, filtrar por empresa
+      if (empresaAtiva && !isSuperAdmin()) {
+        query = query.eq("empresa_id", empresaAtiva);
+      }
+      
+      const { data, error } = await query.order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },

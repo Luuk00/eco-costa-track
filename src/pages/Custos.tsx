@@ -8,6 +8,8 @@ import { CustosTable } from "@/components/custos/CustosTable";
 import { CustosFilters } from "@/components/custos/CustosFilters";
 import { exportToCSV, exportToPDF } from "@/lib/exportUtils";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermission } from "@/hooks/usePermission";
 
 export default function Custos() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -20,11 +22,13 @@ export default function Custos() {
   const [dataFim, setDataFim] = useState("");
   const [ordenacaoData, setOrdenacaoData] = useState<"asc" | "desc">("desc");
   const queryClient = useQueryClient();
+  const { empresaAtiva } = useAuth();
+  const { isSuperAdmin } = usePermission();
 
   const { data: custos, isLoading } = useQuery({
-    queryKey: ["custos"],
+    queryKey: ["custos", empresaAtiva],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("custos")
         .select(`
           *,
@@ -34,8 +38,14 @@ export default function Custos() {
           gastos:gasto_id (
             nome
           )
-        `)
-        .order("data", { ascending: false });
+        `);
+      
+      // Se não for super_admin, filtrar por empresa
+      if (empresaAtiva && !isSuperAdmin()) {
+        query = query.eq("empresa_id", empresaAtiva);
+      }
+      
+      const { data, error } = await query.order("data", { ascending: false });
       if (error) throw error;
       return data;
     },

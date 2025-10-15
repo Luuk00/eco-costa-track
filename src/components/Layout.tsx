@@ -2,6 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { UserMenu } from "@/components/UserMenu";
 import { TrialBanner } from "@/components/TrialBanner";
+import { DebugPanel } from "@/components/DebugPanel";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {children}
           </main>
         </div>
+        <DebugPanel />
       </div>
     </SidebarProvider>
   );

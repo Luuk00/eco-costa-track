@@ -36,7 +36,7 @@ const financeiroMenuItems = [
 ];
 
 export function AppSidebar() {
-  const { hasRole, isSuperAdmin } = usePermission();
+  const { hasRole, isSuperAdmin, isAdmin } = usePermission();
   const { empresaAtiva } = useAuth();
 
   const { data: empresa } = useQuery({
@@ -116,7 +116,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {hasRole("admin") && (
+        {isAdmin() && (
           <SidebarGroup>
             <SidebarGroupLabel>Administração</SidebarGroupLabel>
             <SidebarGroupContent>

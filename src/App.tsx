@@ -131,7 +131,7 @@ const App = () => (
             }
           />
           <Route
-            path="/admin"
+            path="/admin-geral"
             element={
               <ProtectedRoute requireRole="super_admin">
                 <Layout>

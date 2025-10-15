@@ -40,8 +40,8 @@ export default function Custos() {
           )
         `);
       
-      // Se não for super_admin, filtrar por empresa
-      if (empresaAtiva && !isSuperAdmin()) {
+      // Filtrar SEMPRE por empresa
+      if (empresaAtiva) {
         query = query.eq("empresa_id", empresaAtiva);
       }
       

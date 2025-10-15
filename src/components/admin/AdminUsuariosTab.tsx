@@ -68,6 +68,27 @@ export function AdminUsuariosTab() {
     },
   });
 
+  const updatePlanMutation = useMutation({
+    mutationFn: async ({ userId, planType }: { userId: string; planType: string }) => {
+      const { error } = await supabase
+        .from("subscriptions")
+        .update({ 
+          plan_type: planType,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", userId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-usuarios"] });
+      toast.success("Plano atualizado com sucesso!");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Erro ao atualizar plano");
+    },
+  });
+
   const mutation = useMutation({
     mutationFn: async (data: any) => {
       const { nome, empresa_id, role } = data;
@@ -188,7 +209,22 @@ export function AdminUsuariosTab() {
                     {getRoleBadge((user.user_roles as any)?.[0]?.role)}
                   </TableCell>
                   <TableCell>
-                    {getPlanBadge((user.subscriptions as any)?.[0])}
+                    <Select 
+                      value={(user.subscriptions as any)?.[0]?.plan_type || "trial"}
+                      onValueChange={(value) => updatePlanMutation.mutate({ 
+                        userId: user.id, 
+                        planType: value 
+                      })}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="trial">🎁 Trial</SelectItem>
+                        <SelectItem value="monthly">📅 Mensal</SelectItem>
+                        <SelectItem value="annual">📆 Anual</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button

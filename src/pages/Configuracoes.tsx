@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermission } from '@/hooks/usePermission';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,7 @@ import { CreditCard, Globe, User, Building2, Lock } from 'lucide-react';
 
 export default function Configuracoes() {
   const { user, profile } = useAuth();
+  const { isSuperAdmin } = usePermission();
   const { language, setLanguage, t } = useLanguage();
   const queryClient = useQueryClient();
   const [nome, setNome] = useState(profile?.nome || '');
@@ -170,14 +172,18 @@ export default function Configuracoes() {
             <User className="mr-2 h-4 w-4" />
             {t('settings.account')}
           </TabsTrigger>
-          <TabsTrigger value="company">
-            <Building2 className="mr-2 h-4 w-4" />
-            {t('settings.company')}
-          </TabsTrigger>
-          <TabsTrigger value="plan">
-            <CreditCard className="mr-2 h-4 w-4" />
-            {t('settings.plan')}
-          </TabsTrigger>
+          {!isSuperAdmin() && (
+            <TabsTrigger value="company">
+              <Building2 className="mr-2 h-4 w-4" />
+              {t('settings.company')}
+            </TabsTrigger>
+          )}
+          {!isSuperAdmin() && (
+            <TabsTrigger value="plan">
+              <CreditCard className="mr-2 h-4 w-4" />
+              {t('settings.plan')}
+            </TabsTrigger>
+          )}
           <TabsTrigger value="security">
             <Lock className="mr-2 h-4 w-4" />
             Segurança

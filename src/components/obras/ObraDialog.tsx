@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ interface ObraDialogProps {
 
 export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
   const queryClient = useQueryClient();
+  const { empresaAtiva } = useAuth();
   const { register, handleSubmit, reset, setValue, watch } = useForm({
     defaultValues: {
       nome: "",
@@ -87,6 +89,7 @@ export function ObraDialog({ open, onOpenChange, obra }: ObraDialogProps) {
       status: data.status,
       observacao: data.observacao || null,
       orcamento_total: data.orcamento_total ? parseFloat(data.orcamento_total) : null,
+      empresa_id: empresaAtiva,
     };
     mutation.mutate(cleanData);
   };

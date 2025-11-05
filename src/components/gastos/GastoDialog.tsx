@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ interface GastoDialogProps {
 export function GastoDialog({ open, onOpenChange, gasto }: GastoDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { empresaAtiva } = useAuth();
   const { register, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
       nome: "",
@@ -64,6 +66,7 @@ export function GastoDialog({ open, onOpenChange, gasto }: GastoDialogProps) {
       const gastoData = {
         ...data,
         data_fim: data.data_fim || null,
+        empresa_id: empresaAtiva,
       };
 
       if (gasto) {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -29,6 +30,7 @@ interface ImportPreviewProps {
 
 export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPreviewProps) {
   const queryClient = useQueryClient();
+  const { empresaAtiva } = useAuth();
   const [saving, setSaving] = useState(false);
 
   const { data: obras } = useQuery({
@@ -96,6 +98,7 @@ export function ImportPreview({ lancamentos, onUpdate, onComplete }: ImportPrevi
             tipo_operacao: l.tipo_operacao,
             receptor_destinatario: l.nome,
             descricao: `Importado de CSV - ${l.tipo_operacao}`,
+            empresa_id: empresaAtiva,
           };
         })
         .filter(Boolean);

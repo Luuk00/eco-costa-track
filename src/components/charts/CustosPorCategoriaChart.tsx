@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface CustosPorCategoriaChartProps {
   empresaId?: string;
+  dataInicio?: string | null;
+  dataFim?: string | null;
 }
 
 const COLORS = [
@@ -15,9 +17,9 @@ const COLORS = [
   "hsl(var(--chart-5))",
 ];
 
-export function CustosPorCategoriaChart({ empresaId }: CustosPorCategoriaChartProps) {
+export function CustosPorCategoriaChart({ empresaId, dataInicio, dataFim }: CustosPorCategoriaChartProps) {
   const { data: chartData, isLoading } = useQuery({
-    queryKey: ["custos-por-categoria", empresaId],
+    queryKey: ["custos-por-categoria", empresaId, dataInicio, dataFim],
     queryFn: async () => {
       let query = supabase
         .from("custos")
@@ -26,6 +28,10 @@ export function CustosPorCategoriaChart({ empresaId }: CustosPorCategoriaChartPr
 
       if (empresaId) {
         query = query.eq("empresa_id", empresaId);
+      }
+
+      if (dataInicio && dataFim) {
+        query = query.gte("data", dataInicio).lte("data", dataFim);
       }
 
       const { data, error } = await query;

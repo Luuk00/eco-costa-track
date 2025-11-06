@@ -5,11 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface TotalGastoPorFornecedorChartProps {
   empresaId?: string;
+  dataInicio?: string | null;
+  dataFim?: string | null;
 }
 
-export function TotalGastoPorFornecedorChart({ empresaId }: TotalGastoPorFornecedorChartProps) {
+export function TotalGastoPorFornecedorChart({ empresaId, dataInicio, dataFim }: TotalGastoPorFornecedorChartProps) {
   const { data: chartData, isLoading } = useQuery({
-    queryKey: ["gasto-por-fornecedor", empresaId],
+    queryKey: ["gasto-por-fornecedor", empresaId, dataInicio, dataFim],
     queryFn: async () => {
       let query = supabase
         .from("custos")
@@ -19,6 +21,10 @@ export function TotalGastoPorFornecedorChart({ empresaId }: TotalGastoPorFornece
 
       if (empresaId) {
         query = query.eq("empresa_id", empresaId);
+      }
+
+      if (dataInicio && dataFim) {
+        query = query.gte("data", dataInicio).lte("data", dataFim);
       }
 
       const { data: custos, error } = await query;

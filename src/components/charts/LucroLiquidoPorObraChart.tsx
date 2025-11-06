@@ -5,11 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface LucroLiquidoPorObraChartProps {
   empresaId?: string;
+  dataInicio?: string | null;
+  dataFim?: string | null;
 }
 
-export function LucroLiquidoPorObraChart({ empresaId }: LucroLiquidoPorObraChartProps) {
+export function LucroLiquidoPorObraChart({ empresaId, dataInicio, dataFim }: LucroLiquidoPorObraChartProps) {
   const { data: chartData, isLoading } = useQuery({
-    queryKey: ["lucro-por-obra", empresaId],
+    queryKey: ["lucro-por-obra", empresaId, dataInicio, dataFim],
     queryFn: async () => {
       let obrasQuery = supabase
         .from("obras")
@@ -26,10 +28,16 @@ export function LucroLiquidoPorObraChart({ empresaId }: LucroLiquidoPorObraChart
 
       const obraData = await Promise.all(
         obras.map(async (obra) => {
-          const { data: custos } = await supabase
+          let custosQuery = supabase
             .from("custos")
             .select("valor")
             .eq("obra_id", obra.id);
+
+          if (dataInicio && dataFim) {
+            custosQuery = custosQuery.gte("data", dataInicio).lte("data", dataFim);
+          }
+
+          const { data: custos } = await custosQuery;
 
           const entradas = custos?.filter(c => c.valor > 0).reduce((sum, c) => sum + c.valor, 0) || 0;
           const saidas = Math.abs(custos?.filter(c => c.valor < 0).reduce((sum, c) => sum + c.valor, 0) || 0);

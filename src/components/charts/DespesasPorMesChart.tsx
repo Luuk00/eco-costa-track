@@ -7,14 +7,22 @@ import { ptBR } from "date-fns/locale";
 
 interface DespesasPorMesChartProps {
   empresaId?: string;
+  dataInicio?: string | null;
+  dataFim?: string | null;
 }
 
-export function DespesasPorMesChart({ empresaId }: DespesasPorMesChartProps) {
+export function DespesasPorMesChart({ empresaId, dataInicio, dataFim }: DespesasPorMesChartProps) {
   const { data: chartData, isLoading } = useQuery({
-    queryKey: ["despesas-por-mes", empresaId],
+    queryKey: ["despesas-por-mes", empresaId, dataInicio, dataFim],
     queryFn: async () => {
-      const startDate = startOfMonth(subMonths(new Date(), 5));
-      const endDate = endOfMonth(new Date());
+      // Se período específico for fornecido, usar ele. Senão, usar últimos 6 meses
+      const startDate = dataInicio 
+        ? new Date(dataInicio + 'T00:00:00')
+        : startOfMonth(subMonths(new Date(), 5));
+        
+      const endDate = dataFim
+        ? new Date(dataFim + 'T23:59:59')
+        : endOfMonth(new Date());
 
       let query = supabase
         .from("custos")

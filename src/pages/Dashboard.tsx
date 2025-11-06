@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, TrendingUp, TrendingDown, CheckCircle2, Clock, Wallet } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Building2, TrendingUp, TrendingDown, CheckCircle2, Clock, Wallet, Calendar } from "lucide-react";
+import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { AlertasDashboard } from "@/components/AlertasDashboard";
 import { DespesasPorMesChart } from "@/components/charts/DespesasPorMesChart";
 import { CustosPorCategoriaChart } from "@/components/charts/CustosPorCategoriaChart";
@@ -13,6 +17,34 @@ import { usePermission } from "@/hooks/usePermission";
 export default function Dashboard() {
   const { empresaAtiva } = useAuth();
   const { isSuperAdmin } = usePermission();
+  const [periodoSelecionado, setPeriodoSelecionado] = useState<string>("todos");
+
+  // Gerar últimos 12 meses para o select
+  const opcoesPeríodo = [
+    { value: "todos", label: "Todos os períodos" },
+    ...Array.from({ length: 12 }, (_, i) => {
+      const mes = subMonths(new Date(), i);
+      return {
+        value: format(mes, "yyyy-MM"),
+        label: format(mes, "MMMM 'de' yyyy", { locale: ptBR })
+      };
+    })
+  ];
+
+  // Calcular datas de início e fim baseado no período
+  const getDatasDoPeríodo = () => {
+    if (periodoSelecionado === "todos") {
+      return { inicio: null, fim: null };
+    }
+    const [ano, mes] = periodoSelecionado.split("-").map(Number);
+    const data = new Date(ano, mes - 1);
+    return {
+      inicio: format(startOfMonth(data), "yyyy-MM-dd"),
+      fim: format(endOfMonth(data), "yyyy-MM-dd")
+    };
+  };
+
+  const { inicio: dataInicio, fim: dataFim } = getDatasDoPeríodo();
   
   const { data: obras } = useQuery({
     queryKey: ["obras", empresaAtiva],
@@ -31,13 +63,18 @@ export default function Dashboard() {
   });
 
   const { data: custos } = useQuery({
-    queryKey: ["custos", empresaAtiva],
+    queryKey: ["custos", empresaAtiva, dataInicio, dataFim],
     queryFn: async () => {
       let query = supabase.from("custos").select("*");
       
       // Filtrar SEMPRE por empresa
       if (empresaAtiva) {
         query = query.eq("empresa_id", empresaAtiva);
+      }
+      
+      // Filtrar por período
+      if (dataInicio && dataFim) {
+        query = query.gte("data", dataInicio).lte("data", dataFim);
       }
       
       const { data, error } = await query;
@@ -87,6 +124,22 @@ export default function Dashboard() {
       </div>
 
       <AlertasDashboard />
+
+      <div className="flex items-center gap-2 mb-4">
+        <Calendar className="h-5 w-5 text-muted-foreground" />
+        <Select value={periodoSelecionado} onValueChange={setPeriodoSelecionado}>
+          <SelectTrigger className="w-[280px]">
+            <SelectValue placeholder="Selecione o período" />
+          </SelectTrigger>
+          <SelectContent>
+            {opcoesPeríodo.map((opcao) => (
+              <SelectItem key={opcao.value} value={opcao.value}>
+                {opcao.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -172,10 +225,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-        <DespesasPorMesChart empresaId={empresaAtiva} />
-        <CustosPorCategoriaChart empresaId={empresaAtiva} />
-        <LucroLiquidoPorObraChart empresaId={empresaAtiva} />
-        <TotalGastoPorFornecedorChart empresaId={empresaAtiva} />
+        <DespesasPorMesChart empresaId={empresaAtiva} dataInicio={dataInicio} dataFim={dataFim} />
+        <CustosPorCategoriaChart empresaId={empresaAtiva} dataInicio={dataInicio} dataFim={dataFim} />
+        <LucroLiquidoPorObraChart empresaId={empresaAtiva} dataInicio={dataInicio} dataFim={dataFim} />
+        <TotalGastoPorFornecedorChart empresaId={empresaAtiva} dataInicio={dataInicio} dataFim={dataFim} />
       </div>
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">

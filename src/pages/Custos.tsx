@@ -26,28 +26,39 @@ export default function Custos() {
   const { isSuperAdmin } = usePermission();
 
   const { data: custos, isLoading } = useQuery({
-    queryKey: ["custos", empresaAtiva],
+    queryKey: ["custos", empresaAtiva, dataInicio, dataFim],
     queryFn: async () => {
-      let query = supabase
-        .from("custos")
-        .select(`
-          *,
-          obras:obra_id (
-            nome
-          ),
-          gastos:gasto_id (
-            nome
-          )
-        `);
-      
-      // Filtrar SEMPRE por empresa
-      if (empresaAtiva) {
-        query = query.eq("empresa_id", empresaAtiva);
+      const selectStr = `*, obras:obra_id (nome), gastos:gasto_id (nome)`;
+
+      // Com filtro de data: aplicar no servidor
+      if (dataInicio || dataFim) {
+        let query = supabase.from("custos").select(selectStr);
+        if (empresaAtiva) query = query.eq("empresa_id", empresaAtiva);
+        if (dataInicio) query = query.gte("data", dataInicio);
+        if (dataFim) query = query.lte("data", dataFim);
+        const { data, error } = await query.order("data", { ascending: false });
+        if (error) throw error;
+        return data;
       }
-      
-      const { data, error } = await query.order("data", { ascending: false });
-      if (error) throw error;
-      return data;
+
+      // Sem filtro de data: paginar em blocos de 1000 para contornar o limite
+      const PAGE_SIZE = 1000;
+      let todos: any[] = [];
+      let from = 0;
+      while (true) {
+        let query = supabase
+          .from("custos")
+          .select(selectStr)
+          .order("data", { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+        if (empresaAtiva) query = query.eq("empresa_id", empresaAtiva);
+        const { data, error } = await query;
+        if (error) throw error;
+        todos = todos.concat(data || []);
+        if (!data || data.length < PAGE_SIZE) break;
+        from += PAGE_SIZE;
+      }
+      return todos;
     },
   });
 
@@ -86,8 +97,6 @@ export default function Custos() {
     if (selectedGasto !== "all" && custo.gasto_id !== selectedGasto) return false;
     if (selectedTipo !== "all" && custo.tipo_operacao !== selectedTipo) return false;
     if (selectedObservacao !== "all" && custo.observacao !== selectedObservacao) return false;
-    if (dataInicio && custo.data < dataInicio) return false;
-    if (dataFim && custo.data > dataFim) return false;
     return true;
   }).sort((a, b) => {
     if (ordenacaoData === "asc") {

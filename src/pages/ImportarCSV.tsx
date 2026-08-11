@@ -233,23 +233,30 @@ export default function ImportarCSV() {
     toast.success(`${lancamentosProcessados.length} lançamentos importados`);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setFileName(file.name);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
+    try {
+      const buffer = await file.arrayBuffer();
+      let text = new TextDecoder("windows-1252").decode(buffer);
+      if (!text || !text.trim()) {
+        text = new TextDecoder("utf-8").decode(buffer);
+      }
+
       if (detectarBanco(text) === "bradesco") {
         processCSVBradesco(text);
       } else {
         processCSV(text);
       }
-    };
-    reader.readAsText(file, "ISO-8859-1"); // Encoding comum do Banco do Brasil
+    } catch (err) {
+      console.error("Erro ao ler arquivo CSV:", err);
+      toast.error("Erro ao ler o arquivo CSV");
+    }
   };
+
 
   return (
     <div className="space-y-6">

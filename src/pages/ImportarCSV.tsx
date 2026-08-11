@@ -198,7 +198,11 @@ export default function ImportarCSV() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
-      processCSV(text);
+      if (detectarBanco(text) === "bradesco") {
+        processCSVBradesco(text);
+      } else {
+        processCSV(text);
+      }
     };
     reader.readAsText(file, "ISO-8859-1"); // Encoding comum do Banco do Brasil
   };

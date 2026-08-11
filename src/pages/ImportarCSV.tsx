@@ -11,6 +11,134 @@ export default function ImportarCSV() {
   const [fileName, setFileName] = useState("");
   const { empresaAtiva } = useAuth();
 
+  // ---------- Detecção automática do banco ----------
+  const detectarBanco = (text: string): "bradesco" | "bb" => {
+    const normalized = text.toLowerCase();
+    if (
+      normalized.includes("lançamento;dcto") ||
+      normalized.includes("lancamento;dcto") ||
+      (normalized.includes("crédito (r$)") && normalized.includes("débito (r$)")) ||
+      (normalized.includes("credito (r$)") && normalized.includes("debito (r$)"))
+    ) {
+      return "bradesco";
+    }
+    return "bb";
+  };
+
+  // ---------- Helpers Bradesco ----------
+  const parseValorBR = (raw: string) => {
+    if (!raw) return 0;
+    const cleaned = raw.replace(/[^\d,.\-]/g, "").replace(/\./g, "").replace(",", ".");
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const dataBRparaISO = (raw: string) => {
+    const partes = (raw || "").trim().split(/[\/.]/);
+    if (partes.length !== 3) return "";
+    const [dia, mes, ano] = partes;
+    return `${ano}-${mes.padStart(2, "0")}-${dia.padStart(2, "0")}`;
+  };
+
+  const interpretarLancamentoBradesco = (descricaoOriginal: string) => {
+    const descricao = (descricaoOriginal || "").replace(/\s+/g, " ").trim();
+    const upper = descricao.toUpperCase();
+
+    const limparNome = (valor: string) =>
+      valor
+        .replace(/\s+\d{2}\/\d{2}(\/\d{2,4})?\s*$/, "") // remove data final DD/MM
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (upper.startsWith("PIX ENVIADO")) {
+      const nome = limparNome(descricao.replace(/^PIX\s+ENVIADO(\s+DES:?)?/i, ""));
+      return { tipo: "Pix - Enviado", nome: nome || descricao };
+    }
+
+    if (upper.startsWith("PIX RECEBIDO")) {
+      const nome = limparNome(descricao.replace(/^PIX\s+RECEBIDO(\s+(DES|REM|REMET)\.?:?)?/i, ""));
+      return { tipo: "Pix - Recebido", nome: nome || descricao };
+    }
+
+    const mapa: { match: string; tipo: string }[] = [
+      { match: "PAGTO ELETRON", tipo: "Pagamento Eletrônico" },
+      { match: "GASTOS CARTAO", tipo: "Cartão de Crédito" },
+      { match: "TARIFA", tipo: "Tarifa Bancária" },
+      { match: "TED", tipo: "TED" },
+      { match: "DOC", tipo: "DOC" },
+      { match: "MORA", tipo: "Juros / Mora" },
+      { match: "CAPITAL DE GIRO", tipo: "Capital de Giro" },
+      { match: "TRANSFERENCIA", tipo: "Transferência" },
+    ];
+
+    const encontrado = mapa.find((m) => upper.includes(m.match));
+    return {
+      tipo: encontrado ? encontrado.tipo : descricao.split(" ").slice(0, 3).join(" ") || "Outros",
+      nome: limparNome(descricao),
+    };
+  };
+
+  const processCSVBradesco = (text: string) => {
+    const lines = text.split(/\r?\n/);
+    const ignorar = [
+      "extrato de",
+      "saldo anterior",
+      "total",
+      "saldos invest",
+      "saldo invest",
+      "últimos lançamentos",
+      "ultimos lancamentos",
+      "data;lançamento",
+      "data;lancamento",
+    ];
+
+    const lancamentosProcessados = lines
+      .map((line) => {
+        if (!line || !line.trim()) return null;
+        const lower = line.toLowerCase().trim();
+        if (ignorar.some((termo) => lower.startsWith(termo))) return null;
+
+        const cols = line.split(";");
+        if (cols.length < 5) return null;
+
+        const dataISO = dataBRparaISO(cols[0]);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dataISO)) return null;
+
+        const descricao = cols[1] || "";
+        const documento = (cols[2] || "").trim();
+        const creditoRaw = (cols[3] || "").trim();
+        const debitoRaw = (cols[4] || "").trim();
+
+        const isCredito = creditoRaw !== "";
+        const valorBruto = parseValorBR(isCredito ? creditoRaw : debitoRaw);
+        if (!valorBruto) return null;
+
+        const { tipo, nome } = interpretarLancamentoBradesco(descricao);
+
+        return {
+          data: dataISO,
+          documento,
+          codigo_operacao: "",
+          tipo_operacao: tipo,
+          valor: Math.abs(valorBruto),
+          nome,
+          obra_id: null,
+          gasto_id: null,
+          tipo_transacao: isCredito ? "Entrada" : "Saída",
+          empresa_id: empresaAtiva || null,
+        };
+      })
+      .filter(Boolean) as any[];
+
+    if (lancamentosProcessados.length === 0) {
+      toast.error("Nenhum lançamento válido encontrado no extrato Bradesco");
+      return;
+    }
+
+    setLancamentos(lancamentosProcessados);
+    toast.success(`${lancamentosProcessados.length} lançamentos importados (Bradesco)`);
+  };
+
   const processCSV = (text: string) => {
     const lines = text.split("\n").filter((line) => line.trim());
     
@@ -70,7 +198,11 @@ export default function ImportarCSV() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const text = e.target?.result as string;
-      processCSV(text);
+      if (detectarBanco(text) === "bradesco") {
+        processCSVBradesco(text);
+      } else {
+        processCSV(text);
+      }
     };
     reader.readAsText(file, "ISO-8859-1"); // Encoding comum do Banco do Brasil
   };

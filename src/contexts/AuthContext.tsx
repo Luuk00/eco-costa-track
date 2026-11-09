@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { type Context, createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +25,7 @@ interface AuthContextType {
 
 // Shared across module instances so a reloaded copy of this file still finds the provider
 const globalKey = "__finantracker_auth_context__";
-const AuthContext: React.Context<AuthContextType | undefined> =
+const AuthContext: Context<AuthContextType | undefined> =
   (globalThis as any)[globalKey] ??
   ((globalThis as any)[globalKey] = createContext<AuthContextType | undefined>(undefined));
 

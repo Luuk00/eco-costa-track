@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { type Context, createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
@@ -18,7 +18,9 @@ interface SubscriptionContextType {
   loading: boolean;
 }
 
-const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
+const SubscriptionContext: Context<SubscriptionContextType | undefined> =
+  (globalThis as any).__finantracker_SubscriptionContext ??
+  ((globalThis as any).__finantracker_SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined));
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { user, role } = useAuth();

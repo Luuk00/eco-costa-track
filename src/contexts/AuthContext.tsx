@@ -23,7 +23,11 @@ interface AuthContextType {
   refetchProfile: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Shared across module instances so a reloaded copy of this file still finds the provider
+const globalKey = "__finantracker_auth_context__";
+const AuthContext: React.Context<AuthContextType | undefined> =
+  (globalThis as any)[globalKey] ??
+  ((globalThis as any)[globalKey] = createContext<AuthContextType | undefined>(undefined));
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

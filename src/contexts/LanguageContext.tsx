@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { type Context, createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { translations, Language } from '@/i18n/translations';
@@ -9,7 +9,9 @@ interface LanguageContextType {
   t: (key: string) => string;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext: Context<LanguageContextType | undefined> =
+  (globalThis as any).__finantracker_LanguageContext ??
+  ((globalThis as any).__finantracker_LanguageContext = createContext<LanguageContextType | undefined>(undefined));
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();

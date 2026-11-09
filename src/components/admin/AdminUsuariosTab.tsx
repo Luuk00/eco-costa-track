@@ -29,18 +29,17 @@ export function AdminUsuariosTab() {
   const { data: usuarios, isLoading } = useQuery({
     queryKey: ["admin-usuarios"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(`
-          *,
-          user_roles (role),
-          empresas:empresa_id (nome, nome_personalizado),
-          subscriptions (plan_type, status, trial_ends_at)
-        `)
-        .order("nome");
-      
-      if (error) throw error;
-      return data;
+      const [p, r, s] = await Promise.all([
+        supabase.from("profiles").select("*, empresas:empresa_id (nome, nome_personalizado)").order("nome"),
+        supabase.from("user_roles").select("user_id, role"),
+        supabase.from("subscriptions").select("*"),
+      ]);
+      if (p.error) throw p.error;
+      return (p.data || []).map((u: any) => ({
+        ...u,
+        user_roles: (r.data || []).filter((x: any) => x.user_id === u.id),
+        subscriptions: (s.data || []).filter((x: any) => x.user_id === u.id),
+      }));
     },
   });
 
@@ -77,15 +76,23 @@ export function AdminUsuariosTab() {
         updates.subscription_ends_at = null;
       }
 
+      const user: any = usuarios?.find((u: any) => u.id === userId);
+      const existing = user?.subscriptions?.[0];
+      if (existing) {
+        const { error } = await supabase.from("subscriptions").update(updates).eq("id", existing.id);
+        if (error) throw error;
+        return;
+      }
+      if (!user?.empresa_id) throw new Error("Associe o usuário a uma empresa antes de definir o plano");
       const { error } = await supabase
         .from("subscriptions")
-        .update(updates)
-        .eq("user_id", userId);
+        .insert({ ...updates, user_id: userId, empresa_id: user.empresa_id });
       
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-usuarios"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-subscriptions"] });
       toast.success("Plano e data de expiração atualizados com sucesso!");
       setConfirmPlanChange(null);
     },
@@ -311,7 +318,7 @@ export function AdminUsuariosTab() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar mudança de plano</AlertDialogTitle>
             <AlertDialogDescription>
-              Você tem certeza que deseja mudar o plano de <strong>{selectedUser?.nome}</strong> para <strong>{confirmPlanChange?.userName}</strong>?
+              Você tem certeza que deseja mudar o plano de <strong>{usuarios?.find((u: any) => u.id === confirmPlanChange?.userId)?.nome}</strong> para <strong>{confirmPlanChange?.userName}</strong>?
               <br /><br />
               A data de expiração será automaticamente atualizada.
             </AlertDialogDescription>

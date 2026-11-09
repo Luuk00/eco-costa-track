@@ -41,18 +41,17 @@ export default function Usuarios() {
   const { data: usuarios, isLoading } = useQuery({
     queryKey: ["usuarios"],
     queryFn: async () => {
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select(`
-          *,
-          user_roles (role),
-          empresas:empresa_id (nome, nome_personalizado),
-          subscriptions (plan_type, status, trial_ends_at)
-        `)
-        .order("nome");
-      
-      if (error) throw error;
-      return profiles;
+      const [p, r, s] = await Promise.all([
+        supabase.from("profiles").select("*, empresas:empresa_id (nome, nome_personalizado)").order("nome"),
+        supabase.from("user_roles").select("user_id, role"),
+        supabase.from("subscriptions").select("*"),
+      ]);
+      if (p.error) throw p.error;
+      return (p.data || []).map((u: any) => ({
+        ...u,
+        user_roles: (r.data || []).filter((x: any) => x.user_id === u.id),
+        subscriptions: (s.data || []).filter((x: any) => x.user_id === u.id),
+      }));
     },
   });
 

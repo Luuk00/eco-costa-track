@@ -40,17 +40,12 @@ export function AdminSubscriptionsTab() {
   const { data: subscriptions, isLoading } = useQuery({
     queryKey: ["admin-subscriptions"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select(`
-          *,
-          profiles:user_id (nome, email),
-          empresas:empresa_id (nome, nome_personalizado)
-        `)
-        .order("created_at", { ascending: false });
-      
-      if (error) throw error;
-      return data;
+      const [s, p] = await Promise.all([
+        supabase.from("subscriptions").select("*, empresas:empresa_id (nome, nome_personalizado)").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, nome, email"),
+      ]);
+      if (s.error) throw s.error;
+      return (s.data || []).map((x: any) => ({ ...x, profiles: (p.data || []).find((u: any) => u.id === x.user_id) }));
     },
   });
 
@@ -58,7 +53,7 @@ export function AdminSubscriptionsTab() {
     mutationFn: async (data: any) => {
       const { plan_type, status, trial_ends_at, subscription_ends_at } = data;
       
-      await supabase
+      const { error } = await supabase
         .from("subscriptions")
         .update({ 
           plan_type, 
@@ -67,6 +62,7 @@ export function AdminSubscriptionsTab() {
           subscription_ends_at: subscription_ends_at || null,
         })
         .eq("id", selectedSub.id);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-subscriptions"] });
